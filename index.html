@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>First-order step response</title>
+<style>
+  body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+  input[type=range] { width: 100%; }
+  canvas { width: 100%; border: 1px solid #ccc; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h2>y(t) = KA (1 − e<sup>−t/τ</sup>)</h2>
+
+<label>τ = <b><span id="tauVal">1.0</span></b> s</label>
+<input type="range" id="tau" min="0.2" max="5" step="0.1" value="1">
+
+<canvas id="plot" width="760" height="420"></canvas>
+
+<script>
+const K = 1, A = 1;        // fixed constants
+const T_MAX = 10;          // time range [s]
+
+const canvas  = document.getElementById('plot');
+const ctx     = canvas.getContext('2d');
+const slider  = document.getElementById('tau');
+const tauVal  = document.getElementById('tauVal');
+const M = { left: 60, right: 20, top: 20, bottom: 40 };   // margins
+
+function draw() {
+  const tau  = parseFloat(slider.value);
+  tauVal.textContent = tau.toFixed(1);
+
+  const W = canvas.width, H = canvas.height;
+  const yMax = K * A * 1.15;
+  const x = t => M.left + (t / T_MAX) * (W - M.left - M.right);
+  const y = v => H - M.bottom - (v / yMax) * (H - M.top - M.bottom);
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.font = '12px sans-serif';
+
+  // --- axes ---
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x(0), y(0)); ctx.lineTo(x(T_MAX), y(0));
+  ctx.moveTo(x(0), y(0)); ctx.lineTo(x(0), y(yMax));
+  ctx.stroke();
+
+  // x-axis ticks
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  for (let t = 0; t <= T_MAX; t++) ctx.fillText(t, x(t), y(0) + 18);
+  ctx.fillText('t [s]', x(T_MAX), y(0) + 34);
+
+  // y-axis labels
+  ctx.textAlign = 'right';
+  ctx.fillText('KA', x(0) - 8, y(K*A) + 4);
+  ctx.fillText('0',  x(0) - 8, y(0) + 4);
+  ctx.save();
+  ctx.translate(14, y(yMax/2)); ctx.rotate(-Math.PI/2);
+  ctx.textAlign = 'center'; ctx.fillText('y(t)', 0, 0);
+  ctx.restore();
+
+  // --- steady-state line (KA) ---
+  ctx.strokeStyle = 'green';
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x(0), y(K*A)); ctx.lineTo(x(T_MAX), y(K*A));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // --- response curve ---
+  ctx.strokeStyle = '#1f77b4';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 400; i++) {
+    const t = (i / 400) * T_MAX;
+    const v = K * A * (1 - Math.exp(-t / tau));
+    i === 0 ? ctx.moveTo(x(t), y(v)) : ctx.lineTo(x(t), y(v));
+  }
+  ctx.stroke();
+
+  // --- marker at t = τ (63.2 % of final value) ---
+  const vTau = K * A * (1 - Math.exp(-1));
+  ctx.strokeStyle = '#d62728';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x(tau), y(0)); ctx.lineTo(x(tau), y(vTau)); ctx.lineTo(x(0), y(vTau));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#d62728';
+  ctx.beginPath(); ctx.arc(x(tau), y(vTau), 5, 0, 2 * Math.PI); ctx.fill();
+  ctx.textAlign = 'left';
+  ctx.fillText('t = τ  →  y = 0.632·KA', x(tau) + 8, y(vTau) - 8);
+}
+
+slider.addEventListener('input', draw);
+draw();
+</script>
+</body>
+</html>
