@@ -1,103 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>First-order step response</title>
-<style>
-  body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-  input[type=range] { width: 100%; }
-  canvas { width: 100%; border: 1px solid #ccc; margin-top: 1rem; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dynamic Characteristics Toolkit | Module 1: First-Order Time Response</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<main>
+  <!-- Global Toolkit Header & Course Context -->
+  <header class="toolkit-header">
+    <div class="header-meta">
+      <span class="badge course-badge">ENCS4380 Interfacing Techniques</span>
+      <span class="meta-item">Birzeit University</span>
+      <span class="meta-item">Instructor: Dr. Wasel Ghanem</span>
+    </div>
+    <h1 class="toolkit-title">Dynamic Characteristics Interactive Toolkit</h1>
+    <p class="toolkit-desc">
+      An interactive laboratory for modeling, visualizing, and validating sensor dynamic behaviors—exploring time constants, damping, frequency response, and parameter identification.
+    </p>
 
-<h2>y(t) = KA (1 − e<sup>−t/τ</sup>)</h2>
+    <!-- 4-Module Navigation Roadmap -->
+    <nav class="module-nav" aria-label="Homework Modules">
+      <div class="nav-card active" aria-current="page">
+        <span class="nav-chip live">Module 1 · Live</span>
+        <span class="nav-name">First-Order Time Response</span>
+        <span class="nav-owner">Owner: Bashar Ghosheh · Due Nov 3</span>
+      </div>
+      <div class="nav-card locked">
+        <span class="nav-chip upcoming">Module 2 · Checkpoint 2</span>
+        <span class="nav-name">First-Order Frequency Response</span>
+        <span class="nav-owner">Owner: Amro Qutna · Due Nov 9</span>
+      </div>
+      <div class="nav-card locked">
+        <span class="nav-chip upcoming">Module 3 · Checkpoint 2</span>
+        <span class="nav-name">Second-Order &amp; State Space</span>
+        <span class="nav-owner">Owner: Tareq Ahmad · Due Nov 9</span>
+      </div>
+      <div class="nav-card locked">
+        <span class="nav-chip upcoming">Module 4 · Final</span>
+        <span class="nav-name">Guess the Sensor Challenge</span>
+        <span class="nav-owner">Owner: Ahmad AlSheikh · Due Nov 12</span>
+      </div>
+    </nav>
+  </header>
 
-<label>τ = <b><span id="tauVal">1.0</span></b> s</label>
-<input type="range" id="tau" min="0.2" max="5" step="0.1" value="1">
+  <!-- Module 1 Header -->
+  <section class="module-intro">
+    <div class="module-title-wrap">
+      <h2>Module 1: First-Order Sensor Time Response</h2>
+      <span class="module-subtitle">Mercury thermometer &amp; thermal sensor modeling</span>
+    </div>
+    <p>
+      A sensor never reports the present instantly; energy-storing elements (thermal capacitance <em>C</em>, thermal resistance <em>R</em>) introduce smoothing and delay.
+      Explore how static sensitivity <em>K</em> and time constant <em>τ = RC</em> govern the thermometer's transient catch-up to step and ramp inputs.
+    </p>
+  </section>
 
-<canvas id="plot" width="760" height="420"></canvas>
+  <!-- Interactive Controls Card -->
+  <section class="card controls" aria-label="Model parameters">
+    <div class="control-group">
+      <label for="gain">Static Gain K: <span class="value" id="gainValue">1.0</span></label>
+      <input id="gain" type="range" min="0.2" max="3" step="0.1" value="1.0" aria-label="Gain K">
+      <div class="range-bounds"><span>0.2</span><span>3.0</span></div>
+    </div>
+    <div class="control-group">
+      <label for="tau">Time constant τ: <span class="value" id="tauValue">1.0 s</span></label>
+      <input id="tau" type="range" min="0.2" max="5" step="0.1" value="1.0" aria-label="Time constant tau">
+      <div class="range-bounds"><span>0.2 s</span><span>5.0 s</span></div>
+    </div>
+    <div class="control-group">
+      <label for="inputType">Input Waveform x(t)</label>
+      <select id="inputType" aria-label="Select input waveform">
+        <option value="step" selected>Step Input (sudden change)</option>
+        <option value="ramp">Ramp Input (linearly rising)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="amplitude" id="inputLabel">Step amplitude A</label>
+      <input id="amplitude" type="number" min="0.1" max="10" step="0.1" value="1.0">
+    </div>
+  </section>
 
-<script>
-const K = 1, A = 1;        // fixed constants
-const T_MAX = 10;          // time range [s]
+  <!-- Main Response Plot Card -->
+  <section class="card">
+    <div class="card-header-flex">
+      <h2 id="responseTitle">Step response</h2>
+      <div class="header-badges">
+        <span class="equation-pill" id="odeEquation"></span>
+      </div>
+    </div>
+    <div class="equation" id="responseEquation"></div>
+    <div id="responsePlot" class="plot" aria-label="First-order response plot"></div>
+    <div class="metrics" id="responseMetrics"></div>
+  </section>
 
-const canvas  = document.getElementById('plot');
-const ctx     = canvas.getContext('2d');
-const slider  = document.getElementById('tau');
-const tauVal  = document.getElementById('tauVal');
-const M = { left: 60, right: 20, top: 20, bottom: 40 };   // margins
+  <!-- Error Fraction & Log Plot Card -->
+  <section class="card">
+    <div class="card-header-flex">
+      <div>
+        <h2 id="errorTitle">Dynamic Error Fraction &amp; Time Constant Extraction</h2>
+        <p class="card-subtitle">
+          On a natural logarithmic axis, the exponential transient error forms a straight line whose slope is exactly −1/τ.
+        </p>
+      </div>
+      <div class="slope-indicator" id="slopeBadge">
+        <span class="slope-label">Theoretical Slope</span>
+        <span class="slope-value" id="slopeValue">-1.00 s⁻¹</span>
+      </div>
+    </div>
+    <div class="equation" id="errorEquation"></div>
+    <div id="errorPlot" class="plot small" aria-label="Error fraction log plot"></div>
+    <div class="log-explanation" id="logExplanation"></div>
+  </section>
 
-function draw() {
-  const tau  = parseFloat(slider.value);
-  tauVal.textContent = tau.toFixed(1);
+  <!-- Predict, Then Check Card -->
+  <section class="card predict-card">
+    <div class="predict-header">
+      <span class="predict-badge">Active Learning</span>
+      <h2>Predict, then check</h2>
+      <p>Test your intuition before adjusting sliders or reading off the plot.</p>
+    </div>
+    <div class="predict-content">
+      <div class="predict-prompt-box">
+        <p id="predictionPrompt" class="prompt-text">Predict the thermometer reading at t = τ.</p>
+        <span class="prompt-tip" id="predictionTip">Hint: A first-order step response reaches 63.2% of its final value at t = τ.</span>
+      </div>
+      <div class="predict-action-row">
+        <div class="input-wrap">
+          <label for="prediction">Your numerical guess</label>
+          <input id="prediction" type="number" step="any" placeholder="e.g. 0.63">
+        </div>
+        <button id="checkPrediction" type="button">Check prediction</button>
+      </div>
+      <div id="predictionResult" class="prediction-feedback" aria-live="polite"></div>
+    </div>
+  </section>
 
-  const W = canvas.width, H = canvas.height;
-  const yMax = K * A * 1.15;
-  const x = t => M.left + (t / T_MAX) * (W - M.left - M.right);
-  const y = v => H - M.bottom - (v / yMax) * (H - M.top - M.bottom);
+  <!-- Slide & Course Validation Card -->
+  <section class="card">
+    <div class="card-header-flex">
+      <h2>Module 1 Validation Checks</h2>
+      <span class="badge course-badge">Course Slides Reference</span>
+    </div>
+    <p>Mandatory benchmarks from the course lecture notes to verify mathematical precision:</p>
+    <div class="validation" id="validation"></div>
+  </section>
+</main>
 
-  ctx.clearRect(0, 0, W, H);
-  ctx.font = '12px sans-serif';
-
-  // --- axes ---
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x(0), y(0)); ctx.lineTo(x(T_MAX), y(0));
-  ctx.moveTo(x(0), y(0)); ctx.lineTo(x(0), y(yMax));
-  ctx.stroke();
-
-  // x-axis ticks
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  for (let t = 0; t <= T_MAX; t++) ctx.fillText(t, x(t), y(0) + 18);
-  ctx.fillText('t [s]', x(T_MAX), y(0) + 34);
-
-  // y-axis labels
-  ctx.textAlign = 'right';
-  ctx.fillText('KA', x(0) - 8, y(K*A) + 4);
-  ctx.fillText('0',  x(0) - 8, y(0) + 4);
-  ctx.save();
-  ctx.translate(14, y(yMax/2)); ctx.rotate(-Math.PI/2);
-  ctx.textAlign = 'center'; ctx.fillText('y(t)', 0, 0);
-  ctx.restore();
-
-  // --- steady-state line (KA) ---
-  ctx.strokeStyle = 'green';
-  ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  ctx.moveTo(x(0), y(K*A)); ctx.lineTo(x(T_MAX), y(K*A));
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // --- response curve ---
-  ctx.strokeStyle = '#1f77b4';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  for (let i = 0; i <= 400; i++) {
-    const t = (i / 400) * T_MAX;
-    const v = K * A * (1 - Math.exp(-t / tau));
-    i === 0 ? ctx.moveTo(x(t), y(v)) : ctx.lineTo(x(t), y(v));
-  }
-  ctx.stroke();
-
-  // --- marker at t = τ (63.2 % of final value) ---
-  const vTau = K * A * (1 - Math.exp(-1));
-  ctx.strokeStyle = '#d62728';
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(x(tau), y(0)); ctx.lineTo(x(tau), y(vTau)); ctx.lineTo(x(0), y(vTau));
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = '#d62728';
-  ctx.beginPath(); ctx.arc(x(tau), y(vTau), 5, 0, 2 * Math.PI); ctx.fill();
-  ctx.textAlign = 'left';
-  ctx.fillText('t = τ  →  y = 0.632·KA', x(tau) + 8, y(vTau) - 8);
-}
-
-slider.addEventListener('input', draw);
-draw();
-</script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="app.js" defer></script>
 </body>
 </html>

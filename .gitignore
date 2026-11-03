@@ -1,0 +1,14 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor & IDE files
+.vscode/
+.idea/
+
+# Temporary test files & logs
+*.log
+_temp*
+
+# Reference PDFs & documents
+*.pdf
