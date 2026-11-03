@@ -79,6 +79,8 @@ function displayInlineMath(elementId, latexCode) {
 // Main function to calculate values and draw plots
 function updateSimulation() {
 
+    var isMobile = (window.innerWidth <= 600);
+
     // Read current slider values
     var gain = Number(gainSlider.value);
     var tau = Number(tauSlider.value);
@@ -97,24 +99,33 @@ function updateSimulation() {
 
     if (isRamp) {
         inputLabel.textContent = 'Ramp slope r (units/s)';
-        responseTitle.textContent = 'Ramp Response & Dynamic Lag';
-        errorTitle.textContent = 'Transient Departure from Steady-State (Log Plot)';
+        responseTitle.textContent = isMobile ? 'Ramp Response' : 'Ramp Response & Dynamic Lag';
+        errorTitle.textContent = isMobile ? 'Transient Error (Log Plot)' : 'Transient Departure from Steady-State (Log Plot)';
     } else {
         inputLabel.textContent = 'Step amplitude A';
-        responseTitle.textContent = 'Step Response & Time-Constant Markers';
-        errorTitle.textContent = 'Step Error Fraction & Time-Constant Extraction (Log Plot)';
+        responseTitle.textContent = isMobile ? 'Step Response' : 'Step Response & Time-Constant Markers';
+        errorTitle.textContent = isMobile ? 'Error Fraction (Log Plot)' : 'Step Error Fraction & Time-Constant Extraction (Log Plot)';
     }
 
-    // Equations
-    displayInlineMath('odeEquation', '\\tau \\dot{y} + y = K x(t) \\iff G(s) = \\frac{K}{\\tau s + 1}');
+    // Equations (compact on mobile to prevent horizontal overflow)
+    if (isMobile) {
+        displayInlineMath('odeEquation', 'G(s) = \\frac{K}{\\tau s + 1}');
+    } else {
+        displayInlineMath('odeEquation', '\\tau \\dot{y} + y = K x(t) \\iff G(s) = \\frac{K}{\\tau s + 1}');
+    }
 
     if (isRamp) {
-        displayMath('responseEquation', 'y(t) = K r \\left[ t - \\tau \\left( 1 - e^{-t/\\tau} \\right) \\right], \\quad y_{ss}(t) = K r (t - \\tau)');
-        displayMath('errorEquation', '\\ln \\left| \\frac{y_{ss}(t) - y(t)}{K r \\tau} \\right| = -\\frac{1}{\\tau} t');
+        if (isMobile) {
+            displayMath('responseEquation', 'y(t) = Kr\\left[t-\\tau(1-e^{-t/\\tau})\\right]');
+            displayMath('errorEquation', '\\ln|y_{ss}-y| = -\\frac{t}{\\tau} + c');
+        } else {
+            displayMath('responseEquation', 'y(t) = K r \\left[ t - \\tau \\left( 1 - e^{-t/\\tau} \\right) \\right], \\quad y_{ss}(t) = K r (t - \\tau)');
+            displayMath('errorEquation', '\\ln \\left| \\frac{y_{ss}(t) - y(t)}{K r \\tau} \\right| = -\\frac{1}{\\tau} t');
+        }
         logExplanationDiv.innerHTML = 'For a ramp input, the transient error decays with slope <strong>m = -1/τ = ' + formatNumber(-1 / tau, 2) + ' s⁻¹</strong>.';
     } else {
         displayMath('responseEquation', 'y(t) = K A \\left( 1 - e^{-t/\\tau} \\right)');
-        displayMath('errorEquation', '\\ln \\left( \\frac{e(t)}{e(0)} \\right) = -\\frac{1}{\\tau} t, \\quad \\text{where } e(t) = KA - y(t)');
+        displayMath('errorEquation', '\\ln \\left( \\frac{e(t)}{e(0)} \\right) = -\\frac{1}{\\tau} t');
         logExplanationDiv.innerHTML = 'The error fraction e(t)/e(0) plotted on a log axis is a straight line with slope <strong>m = -1/τ = ' + formatNumber(-1 / tau, 2) + ' s⁻¹</strong>.';
     }
 
@@ -171,7 +182,7 @@ function updateSimulation() {
         var inputTrace = {
             x: timeArray,
             y: inputArray,
-            name: 'Input ramp x(t) = ' + formatNumber(amplitude, 1) + 't',
+            name: isMobile ? 'x(t)' : 'Input ramp x(t)',
             mode: 'lines',
             line: { color: '#90a4ae', dash: 'dash', width: 2 }
         };
@@ -191,7 +202,7 @@ function updateSimulation() {
         var ssTrace = {
             x: ssTimeArray,
             y: ssOutputArray,
-            name: 'Steady-state line Kr(t - τ)',
+            name: isMobile ? 'y_ss(t)' : 'Steady-state line',
             mode: 'lines',
             line: { color: '#2e7d32', dash: 'dot', width: 2 }
         };
@@ -201,7 +212,7 @@ function updateSimulation() {
         var outputTrace = {
             x: timeArray,
             y: outputArray,
-            name: 'Thermometer output y(t)',
+            name: isMobile ? 'y(t)' : 'Output y(t)',
             mode: 'lines',
             line: { color: '#1565c0', width: 3 }
         };
@@ -227,19 +238,19 @@ function updateSimulation() {
             y0: yAtRef,
             x1: tRef,
             y1: yAtRef,
-            line: { color: '#d84315', width: 2.5 }
+            line: { color: '#d84315', width: 2.2 }
         };
         shapes.push(lagShape);
 
         var lagAnnotation = {
             x: tRef - (tau / 2),
             y: yAtRef,
-            text: 'Lag τ = ' + formatNumber(tau, 1) + ' s',
+            text: isMobile ? ('Lag: ' + formatNumber(tau, 1) + 's') : ('Lag τ = ' + formatNumber(tau, 1) + ' s'),
             showarrow: true,
             arrowhead: 2,
             ax: 0,
-            ay: -26,
-            font: { color: '#d84315', size: 11, weight: 'bold' },
+            ay: isMobile ? -20 : -26,
+            font: { color: '#d84315', size: isMobile ? 10 : 11, weight: 'bold' },
             bgcolor: 'rgba(255,255,255,0.92)',
             bordercolor: '#d84315',
             borderwidth: 1
@@ -253,19 +264,19 @@ function updateSimulation() {
             y0: yAtRef,
             x1: tRef,
             y1: targetY,
-            line: { color: '#6a1b9a', width: 2.5 }
+            line: { color: '#6a1b9a', width: 2.2 }
         };
         shapes.push(errorShape);
 
         var errorAnnotation = {
             x: tRef,
             y: (yAtRef + targetY) / 2,
-            text: 'e_ss = ' + formatNumber(steadyStateError, 2),
+            text: isMobile ? ('e_ss: ' + formatNumber(steadyStateError, 1)) : ('e_ss = ' + formatNumber(steadyStateError, 2)),
             showarrow: true,
             arrowhead: 2,
-            ax: 42,
+            ax: isMobile ? 32 : 42,
             ay: 0,
-            font: { color: '#6a1b9a', size: 11, weight: 'bold' },
+            font: { color: '#6a1b9a', size: isMobile ? 10 : 11, weight: 'bold' },
             bgcolor: 'rgba(255,255,255,0.92)',
             bordercolor: '#6a1b9a',
             borderwidth: 1
@@ -274,8 +285,8 @@ function updateSimulation() {
 
         // Metrics for ramp
         responseMetricsDiv.innerHTML =
-            '<div class="metric-item">Time Lag: <strong>' + formatNumber(tau, 2) + ' s</strong></div>' +
-            '<div class="metric-item">Steady-State Error: <strong>' + formatNumber(steadyStateError, 2) + ' units</strong></div>';
+            '<div class="metric-item"><span>Time Lag:</span><strong>' + formatNumber(tau, 2) + ' s</strong></div>' +
+            '<div class="metric-item"><span>Steady-State Error:</span><strong>' + formatNumber(steadyStateError, 2) + ' units</strong></div>';
 
     } else {
 
@@ -288,7 +299,7 @@ function updateSimulation() {
         var finalValueTrace = {
             x: [0, maxTime],
             y: [finalValue, finalValue],
-            name: 'Final value KA = ' + formatNumber(finalValue, 2),
+            name: isMobile ? 'Final' : 'Final KA',
             mode: 'lines',
             line: { color: '#546e7a', dash: 'dash', width: 1.8 }
         };
@@ -298,7 +309,7 @@ function updateSimulation() {
         var stepOutputTrace = {
             x: timeArray,
             y: outputArray,
-            name: 'Thermometer output y(t)',
+            name: isMobile ? 'y(t)' : 'Output y(t)',
             mode: 'lines',
             line: { color: '#1565c0', width: 3 }
         };
@@ -308,46 +319,55 @@ function updateSimulation() {
         var markersTrace = {
             x: [tau, 3 * tau],
             y: [valueAtTau, valueAt3Tau],
-            name: 'Key Markers (τ, 3τ)',
+            name: isMobile ? 'Markers' : 'Markers (τ, 3τ)',
             mode: 'markers+text',
-            text: [
+            text: isMobile ? [
+                'τ (63%)',
+                '3τ (95%)'
+            ] : [
                 'τ = ' + formatNumber(tau, 1) + 's (63.2%)',
                 '3τ = ' + formatNumber(3 * tau, 1) + 's (95.0%)'
             ],
             textposition: ['top right', 'bottom right'],
-            marker: { size: 10, color: '#c62828' }
+            textfont: { size: isMobile ? 9 : 11 },
+            marker: { size: isMobile ? 8 : 10, color: '#c62828' }
         };
         traces.push(markersTrace);
 
         // Droplines for tau
-        shapes.push({ type: 'line', x0: tau, y0: 0, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.5 } });
-        shapes.push({ type: 'line', x0: 0, y0: valueAtTau, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.5 } });
+        shapes.push({ type: 'line', x0: tau, y0: 0, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: 0, y0: valueAtTau, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
 
         // Droplines for 3tau
-        shapes.push({ type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.5 } });
-        shapes.push({ type: 'line', x0: 0, y0: valueAt3Tau, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.5 } });
+        shapes.push({ type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: 0, y0: valueAt3Tau, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
 
         // Metrics for step
         responseMetricsDiv.innerHTML =
-            '<div class="metric-item">Final Value KA: <strong>' + formatNumber(finalValue, 2) + '</strong></div>' +
-            '<div class="metric-item">At t = τ (63.2%): <strong>' + formatNumber(valueAtTau, 2) + '</strong></div>' +
-            '<div class="metric-item">At t = 3τ (95.0%): <strong>' + formatNumber(valueAt3Tau, 2) + '</strong></div>';
+            '<div class="metric-item"><span>Final Value KA:</span><strong>' + formatNumber(finalValue, 2) + '</strong></div>' +
+            '<div class="metric-item"><span>At t = τ (63.2%):</span><strong>' + formatNumber(valueAtTau, 2) + '</strong></div>' +
+            '<div class="metric-item"><span>At t = 3τ (95.0%):</span><strong>' + formatNumber(valueAt3Tau, 2) + '</strong></div>';
     }
 
-    // Layout for response plot
+    // Responsive layout for response plot
     var responseLayout = {
-        margin: { l: 60, r: 24, t: 24, b: 54 },
+        margin: isMobile ? { l: 38, r: 10, t: 15, b: 65 } : { l: 60, r: 24, t: 24, b: 54 },
         paper_bgcolor: 'transparent',
         plot_bgcolor: '#ffffff',
-        font: { family: 'sans-serif', color: '#1a2a3a' },
-        legend: { orientation: 'h', y: 1.15, x: 0 },
+        font: { family: 'sans-serif', color: '#1a2a3a', size: isMobile ? 10 : 12 },
+        legend: {
+            orientation: 'h',
+            y: isMobile ? -0.32 : 1.15,
+            x: 0,
+            font: { size: isMobile ? 9 : 11 }
+        },
         xaxis: {
-            title: 'Time t (seconds)',
+            title: isMobile ? 't (s)' : 'Time t (seconds)',
             range: [0, maxTime],
             gridcolor: '#eceff1'
         },
         yaxis: {
-            title: isRamp ? 'Response & Input y(t), x(t)' : 'Sensor Output y(t)',
+            title: isRamp ? 'y(t), x(t)' : 'Output y(t)',
             rangemode: 'tozero',
             gridcolor: '#eceff1'
         },
@@ -376,19 +396,20 @@ function updateSimulation() {
     var logLineTrace = {
         x: logTimes,
         y: logValues,
-        name: 'ln(Error Fraction) — Slope = ' + formatNumber(-1 / tau, 2),
+        name: isMobile ? 'ln(Error)' : ('ln(Error Fraction) — Slope = ' + formatNumber(-1 / tau, 2)),
         mode: 'lines',
-        line: { color: '#d84315', width: 3 }
+        line: { color: '#d84315', width: 2.5 }
     };
 
     var logMarkersTrace = {
         x: [tau, 2 * tau, 3 * tau],
         y: [-1, -2, -3],
-        name: 'Integer τ Marks',
+        name: 'τ Marks',
         mode: 'markers+text',
-        text: ['(τ, -1)', '(2τ, -2)', '(3τ, -3)'],
+        text: ['(τ,-1)', '(2τ,-2)', '(3τ,-3)'],
         textposition: 'bottom left',
-        marker: { size: 9, color: '#c62828' }
+        textfont: { size: isMobile ? 8 : 11 },
+        marker: { size: isMobile ? 6 : 9, color: '#c62828' }
     };
 
     var logShapes = [
@@ -399,19 +420,24 @@ function updateSimulation() {
     ];
 
     var logLayout = {
-        margin: { l: 60, r: 24, t: 24, b: 54 },
+        margin: isMobile ? { l: 38, r: 10, t: 15, b: 65 } : { l: 60, r: 24, t: 24, b: 54 },
         paper_bgcolor: 'transparent',
         plot_bgcolor: '#ffffff',
-        font: { family: 'sans-serif', color: '#1a2a3a' },
+        font: { family: 'sans-serif', color: '#1a2a3a', size: isMobile ? 10 : 12 },
         showlegend: true,
-        legend: { orientation: 'h', y: 1.15, x: 0 },
+        legend: {
+            orientation: 'h',
+            y: isMobile ? -0.32 : 1.15,
+            x: 0,
+            font: { size: isMobile ? 9 : 11 }
+        },
         xaxis: {
-            title: 'Time t (seconds)',
+            title: isMobile ? 't (s)' : 'Time t (seconds)',
             range: [0, Math.min(maxTime, 4.2 * tau)],
             gridcolor: '#eceff1'
         },
         yaxis: {
-            title: 'Natural Log ln( e(t) / e(0) )',
+            title: isMobile ? 'ln( e / e₀ )' : 'Natural Log ln( e(t) / e(0) )',
             range: [-4.2, 0.2],
             gridcolor: '#eceff1'
         },
@@ -563,9 +589,12 @@ predictionInput.addEventListener('keydown', function(event) {
 // Run once on page load
 window.addEventListener('load', function() {
     updateSimulation();
+    Plotly.Plots.resize('responsePlot');
+    Plotly.Plots.resize('errorPlot');
 });
 
 window.addEventListener('resize', function() {
+    updateSimulation();
     Plotly.Plots.resize('responsePlot');
     Plotly.Plots.resize('errorPlot');
 });
