@@ -12,7 +12,7 @@ Interactive web toolkit for sensor dynamic characteristics, built for **ENCS4380
 | Member | Assigned Module | Milestone | Status |
 | :--- | :--- | :--- | :--- |
 | **Bashar Ghosheh** | **Module 1: First-Order Time Response** | Checkpoint 1 | Completed |
-| **Amro Qutna** | Module 2: First-Order Frequency Response | Checkpoint 2 | In Progress |
+| **Amro Qutna** | Module 2: First-Order Frequency Response | Checkpoint 2 | Completed |
 | **Tareq Ahmad** | Module 3: Second-Order Response | Checkpoint 2 | In Progress |
 | **Ahmad AlSheikh** | Module 4: Guess the Sensor Challenge | Final Release | Backlog |
 
