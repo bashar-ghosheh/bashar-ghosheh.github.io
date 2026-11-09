@@ -13,7 +13,7 @@ Interactive web toolkit for sensor dynamic characteristics, built for **ENCS4380
 | :--- | :--- | :--- | :--- |
 | **Bashar Ghosheh** | **Module 1: First-Order Time Response** | Checkpoint 1 | Completed |
 | **Amro Qutna** | Module 2: First-Order Frequency Response | Checkpoint 2 | Completed |
-| **Tareq Ahmad** | Module 3: Second-Order Response | Checkpoint 2 | In Progress |
+| **Tareq Ahmad** | Module 3: Second-Order Response | Checkpoint 2 | Completed |
 | **Ahmad AlSheikh** | Module 4: Guess the Sensor Challenge | Final Release | Backlog |
 
 ---
@@ -33,6 +33,26 @@ $$\tau \dot{y} + y = K x(t) \iff G(s) = \frac{K}{\tau s + 1}$$
 
 ---
 
+## Module 3: Second-Order Response and State Space
+
+Built by **Tareq Ahmad**. [Open Module 3](module3.html).
+
+The mass-spring-damper model is `m*x'' + b*x' + k*x = F(t)`, with a 1 N step input. Its transfer function is `G(s) = 1/(m*s^2 + b*s + k)`, natural frequency is `sqrt(k/m)`, damping ratio is `b/(2*sqrt(m*k))`, and final displacement is `1/k` metres.
+
+- Live mass, damping and stiffness controls, plus underdamped, critical and overdamped presets.
+- Closed-form displacement response with measured 10–90% rise time, peak time, overshoot and 2% settling time.
+- Live state-space matrices A and B, transfer poles and matching eigenvalues, and a displacement–velocity phase plane.
+- Prediction exercise, interactive graph readings, quiz and lecture validation checks 4–6.
+- Validation: 16.3% overshoot at damping ratio 0.5, no overshoot at critical damping, and poles/eigenvalues of -1 ± j1.732 for m=1, b=2, k=4.
+
+Run the numerical checks from the repository root:
+
+```sh
+node --test frequency.test.js second-order.test.js
+```
+
+Plotly and KaTeX load from CDNs, so an internet connection is required.
+
 ## Screenshots
 
 ### Step Response
@@ -40,6 +60,9 @@ $$\tau \dot{y} + y = K x(t) \iff G(s) = \frac{K}{\tau s + 1}$$
 
 ### Ramp Response
 ![Ramp Response](screenshots/module1_ramp.png)
+
+### Module 3: Second-Order Response
+![Second-order response and state-space panel](screenshots/module3.png)
 
 ---
 
@@ -52,3 +75,5 @@ $$\tau \dot{y} + y = K x(t) \iff G(s) = \frac{K}{\tau s + 1}$$
 
 ## AI Assistant Disclosure
 In accordance with course guidelines (Section 8), AI tools were used to help structure the HTML/CSS layout, set up the Plotly chart configurations, and run automated browser tests. All formulas and physics logic were reviewed and verified against course materials.
+
+For Module 3, Codex assisted with implementation, packaging, numerical verification and repository integration. Tareq Ahmad is responsible for reviewing and explaining the module's code and equations.
