@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guess the sensor · ENCS4380</title>
+<script src="module-assets/theme.js"></script><link rel="stylesheet" href="module-assets/styles.css">
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script defer src="module-assets/graph-reader.js"></script>
+<script defer src="module-assets/icons.js"></script>
+<script defer src="module-assets/shared.js"></script>
+<script defer src="module-assets/quiz.js"></script>
+<script defer src="frequency.js"></script>
+<script defer src="second-order.js"></script>
+<script defer src="sensor-game.js"></script>
+<script defer src="module4.js"></script></head>
+<body data-module="4"><header class="top"><div class="bar"><nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="module1.html" aria-label="Module 1: First-order time response"><i data-icon="thermometer"></i>M1</a><a href="module2.html" aria-label="Module 2: First-order frequency response"><i data-icon="wave"></i>M2</a><a href="module3.html" aria-label="Module 3: Second-order response"><i data-icon="spring"></i>M3</a><a href="module4.html" aria-label="Module 4: Guess the sensor" aria-current="page"><i data-icon="search"></i>M4</a></nav><button id="theme">Theme</button></div></header><main>
+<section class="hero"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · MODULE 04</p><h1>Guess the sensor</h1><p class="credit">Ahmad AlSheikh · Dr. Wasel Ghanem</p><p>A sensor with unknown parameters is on your test bench. All you get is one noisy response curve. Read the curve and work backwards, the way an engineer does with a real sensor.</p></div><div class="hero-art"><i data-icon="search"></i></div></section>
+
+<details open><summary><i data-icon="play"></i>How to play</summary><ol>
+  <li><b>Look.</b> Decide if the sensor is first order or second order.</li>
+  <li><b>Measure.</b> Use the level ruler and the time inspector to read values off the dots.</li>
+  <li><b>Estimate.</b> Type your numbers and lock them in. The page shows the true sensor on top of your guess.</li>
+</ol><p>Every estimate within 10% of the true value earns full marks. Need help? Ask for a hint: hints are free.</p></details>
+
+<section class="card"><div class="case"><h2><i data-icon="search"></i><span id="caseTitle">Mystery sensor</span></h2><button type="button" class="quiet" id="newSensor"><i data-icon="refresh"></i>New sensor</button></div>
+  <p id="briefing"></p>
+
+  <div class="plot" id="unknown" aria-label="Noisy response of the hidden sensor"></div>
+  <p id="verdict" class="readout" aria-live="polite" hidden></p>
+
+  <label for="cursor"><i data-icon="ruler"></i> Level ruler <output id="cursorValue" for="cursor"></output></label>
+  <input id="cursor" type="range" min="0" max="1" step="0.001" value="0">
+  <p class="status">Slide the dashed ruler to a level. Type a time in “Inspect Time” above the plot to read one dot. The dots are noisy, so trust the trend, not one dot.</p>
+</section>
+
+<section class="card" id="identifyCard"><h2><i data-icon="eye"></i>First look</h2>
+  <div id="identify"><p>What kind of sensor made this curve?</p>
+    <div class="actions"><button type="button" id="pickFirst">First order</button><button type="button" id="pickSecond">Second order</button></div>
+    <details><summary>Show a hint</summary><p>A first-order step climbs to its final level and never goes above it. Does this curve overshoot?</p></details></div>
+  <p id="identifyResult" class="readout" aria-live="polite" hidden></p>
+</section>
+
+<section class="card predict-card" id="estimateCard" hidden><h2><i data-icon="pencil"></i>Your estimate</h2>
+  <p id="task"></p>
+  <form class="predict-action-row" id="estimateForm">
+    <div class="input-wrap"><label for="first" id="firstLabel">First value</label><input id="first" type="number" step="any" required></div>
+    <div class="input-wrap" id="secondWrap"><label for="second" id="secondLabel">Second value</label><input id="second" type="number" step="any" required></div>
+    <button id="lock"><i data-icon="lock"></i>Lock in my estimate</button>
+    <button type="button" class="quiet" id="hintButton"><i data-icon="bulb"></i>Show a hint</button>
+  </form>
+  <ol id="hints" aria-live="polite"></ol>
+</section>
+
+<section class="card" id="logCard" hidden><h2><i data-icon="chart"></i>Log method view</h2>
+  <p>For a first-order step, ln(1 − y/K) against time is a straight line with slope −1/τ. This view uses the K you type in the estimate box.</p>
+  <p id="logNote" class="readout warn">Type your K estimate in the box above to draw this view.</p>
+  <div class="plot small" id="logView" aria-label="Natural log of the error fraction against time" hidden></div>
+</section>
+
+<section class="card" id="reveal" hidden aria-live="polite"><h2><i data-icon="check"></i>The true sensor</h2>
+  <div class="table-scroll"><table><thead><tr><th>Parameter</th><th>Your estimate</th><th>True value</th><th>Error</th><th>Points</th></tr></thead><tbody id="resultRows"></tbody></table></div>
+  <h3>How to read it off this curve</h3>
+  <ol id="solution"></ol>
+  <p class="status">Your score is locked. Change the numbers in the estimate box and watch your dashed curve move onto the true one.</p>
+  <div class="actions"><button type="button" id="nextSensor"><i data-icon="refresh"></i>Next sensor</button></div>
+</section>
+
+<section class="card scoreboard" aria-label="Session score"><div class="card-header-flex"><h2><i data-icon="trophy"></i>Session score</h2><span class="equation-pill" id="rank"></span></div>
+  <div class="metrics">
+    <div class="metric-item">Rounds played <strong id="rounds">0</strong></div>
+    <div class="metric-item">Average score <strong id="average">–</strong></div>
+    <div class="metric-item">Full-marks rounds <strong id="perfect">0</strong></div>
+    <div class="metric-item">Type spotted <strong id="spotted">–</strong></div>
+  </div>
+  <div class="chips" id="history" aria-label="Scores of earlier rounds"></div>
+</section>
+
+<section class="card"><h2><i data-icon="help"></i>Check your understanding</h2><p>Choose one answer for every question, then check your score.</p><form id="quizForm"><div id="quiz"></div><div class="actions"><button type="submit">Check answers</button><button type="button" id="resetQuiz">Restart quiz</button></div><p id="quizScore" role="status"></p></form></section>
+<details><summary><i data-icon="book"></i>Sensor glossary</summary><dl><dt><b>τ</b></dt><dd>Time constant in seconds; a step reaches 63.2% of its final change at τ.</dd><dt><b>ω and ωₙ</b></dt><dd>Input angular frequency and undamped natural frequency, in rad/s.</dd><dt><b>M and φ</b></dt><dd>Output/input amplitude ratio and output phase relative to the input.</dd><dt><b>ζ</b></dt><dd>Damping ratio. Values below one allow oscillation.</dd><dt><b>Overshoot and settling</b></dt><dd>Excess above the final value, and the time until the response stays within its specified band.</dd><dt><b>Poles and eigenvalues</b></dt><dd>The roots of the transfer denominator and the characteristic roots of the state matrix. Both describe the natural motion here.</dd></dl></details>
+<nav class="card" aria-label="Learning path"><a href="index.html">Back to hub</a><a href="module3.html">Previous: Module 3</a><button id="complete"></button></nav></main><footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>Bashar Ghosheh · Amro Qutna · Tareq Ahmad · Ahmad AlSheikh</footer></body></html>
