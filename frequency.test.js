@@ -7,7 +7,7 @@ function near(actual, expected, tolerance) {
 test('sin(2t), tau = 0.2 s', () => {
   const r = response(0.2, 2);
   near(r.ratio, 0.92848, 0.00001);
-  near(r.phase * 180 / Math.PI, -21.8, 0.05);
+  near((r.phase * 180) / Math.PI, -21.8, 0.05);
   near(r.error, -0.07152, 0.00001);
   near(wave(0, 2, r), -0.34483, 0.00001);
 });
@@ -21,7 +21,7 @@ test('100 Hz bandwidth with 5% maximum loss', () => {
   const tau = tauLimit(100, 0.05);
   near(tau * 1000, 0.523, 0.001);
   near(response(tau, angularFrequency(100)).ratio, 0.95, 1e-12);
-  near(response(tau, angularFrequency(50)).phase * 180 / Math.PI, -9.3, 0.05);
+  near((response(tau, angularFrequency(50)).phase * 180) / Math.PI, -9.3, 0.05);
 });
 
 test('two-tone input and steady-state output, including the single-tone limit', () => {
