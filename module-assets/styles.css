@@ -12,3 +12,81 @@
 .hero img.university-mark{margin-inline:auto}
 .field-range{display:inline-block;margin-inline:.45rem;color:var(--muted);font-size:.82rem;font-weight:400;overflow-wrap:anywhere}
 input::placeholder{color:var(--muted);opacity:.72}
+
+/* ---- Hub, Module 1 retheme and Module 4 additions ---- */
+[hidden]{display:none!important}
+.lead{font-size:1.08rem;max-width:64ch}
+.grid{margin:0 0 16px}.grid .card{margin:0}.grid h3{font-size:1.15rem;margin-bottom:.3em}.grid p{margin:.3em 0 .8em}
+.status{color:var(--muted);font-size:.85rem}
+.symbols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr));gap:15px;margin:0}
+.symbols div{background:var(--subtle);border-radius:8px;padding:10px 14px}
+.symbols dt{font:600 1.6rem/1.2 Georgia,serif;color:var(--output)}.symbols dd{margin:0}
+.tea-track{position:relative;height:26px;border-radius:13px;background:var(--subtle);border:1px solid var(--edge);overflow:hidden;margin:14px 0 4px}
+.tea-track div{height:100%;width:0;background:var(--output)}
+.tea-ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--edge)}th{color:var(--muted);font-weight:600}
+.input-wrap label{margin-bottom:4px}
+.metric-item strong{margin-left:4px}
+.scoreboard .metric-item{flex:1 1 130px}.scoreboard .metric-item strong{display:block;margin:0;font-size:1.3rem}
+button.quiet{background:transparent;color:var(--output);border:1px solid var(--edge)}
+.case{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:.4em}.case h2{margin:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span{background:var(--subtle);border-radius:20px;padding:3px 11px;font-size:.85rem}
+#hints{padding-left:1.2em}#hints li{margin:.5em 0}#hints table{width:auto;font-size:.88rem;margin-top:6px}
+.readout{margin:.8em 0}
+.team td:first-child{font-weight:600}
+.card details{border:0;padding:0;margin:.6em 0;background:none}
+#checks{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+#unknown{height:390px}
+
+/* ---- Icons, alignment and interaction polish ---- */
+.icon{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+h2{display:flex;align-items:center;gap:.5em}h2 .icon,summary .icon{color:var(--output)}summary .icon{margin-right:.35em}
+.bar a{text-decoration:none;gap:6px;transition:background .15s}.bar a:hover{background:var(--subtle)}
+button,.start{gap:8px;transition:transform .12s,filter .12s}
+button:hover:not(:disabled),.start:hover{filter:brightness(1.14)}
+button:active:not(:disabled),.start:active{transform:scale(.97)}
+/* hero: text on the left, picture on the right */
+.hero{display:grid;gap:18px;align-items:center}
+.hero img.university-mark{margin:0 0 1.1rem;width:min(72%,290px)}
+.hero-art{display:none;place-items:center;color:#00705f}
+.hero-art.always{display:grid}
+.hero-art>.icon{width:150px;height:150px;stroke-width:1.1;padding:26px;border-radius:50%;background:rgba(255,255,255,.6)}
+.hero-art svg.curve{width:100%;max-width:400px;height:auto}
+@media(min-width:760px){.hero{grid-template-columns:1.6fr 1fr}.hero-art{display:grid}}
+.curve .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.8s .2s ease-out forwards}
+.curve .late{opacity:0;animation:appear .5s 1.4s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes appear{to{opacity:1}}
+/* aligned blocks */
+.card-header-flex{justify-content:space-between;margin-bottom:.7em}.card-header-flex h2{margin:0}
+.controls{align-items:start}
+.field-range{display:block;margin:.25rem 0 0}
+.parameter-entry{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin-top:6px}.parameter-entry .field-range{flex-basis:100%;margin:0}
+.metrics .metric-item{flex:1 1 150px}
+.check{display:flex;flex-direction:column;gap:2px}.check .check-status{margin-top:auto;padding-top:6px}
+.predict-action-row{align-items:start}.predict-action-row>button{margin-top:1.75em}
+nav.card{justify-content:flex-start}nav.card button{margin-left:auto}
+footer{text-align:center;border-top:1px solid var(--edge);padding-top:16px;margin-top:8px}
+/* hub cards */
+.badge-icon{width:48px;height:48px;border-radius:12px;background:var(--subtle);color:var(--output);display:grid;place-items:center;margin-bottom:12px;transition:background .2s,color .2s}
+.badge-icon .icon{width:27px;height:27px}
+.grid .card{transition:transform .18s,box-shadow .18s,border-color .18s}
+.grid .card:hover{transform:translateY(-4px);border-color:var(--output);box-shadow:0 14px 26px -18px var(--text)}
+.grid .card:hover .badge-icon,.grid .card.done .badge-icon{background:var(--output);color:var(--surface)}
+.grid .card.done{border-color:var(--pass)}
+.grid .status{margin-top:auto}.grid .start{margin-top:0;align-self:stretch}
+.tea-track{overflow:visible}.tea-track div{border-radius:13px}
+.tea-track i{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--target)}
+.tea-marks{position:relative;height:1.3em;color:var(--target);font-size:.8rem}.tea-marks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.readout{animation:pop .3s}@keyframes pop{from{transform:scale(.97);opacity:.3}}
+/* Module 4 celebration */
+.confetti{position:fixed;top:-14px;width:9px;height:14px;z-index:30;pointer-events:none;animation:fall 1.9s ease-in forwards}
+@keyframes fall{to{transform:translateY(106vh) rotate(560deg)}}
+@media(max-width:520px){.bar a .icon{display:none}.predict-action-row>button{margin-top:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}.curve .draw{stroke-dashoffset:0}.curve .late{opacity:1}}
+.downloads{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.download{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--edge);border-radius:12px;color:var(--text);text-decoration:none;background:var(--surface);transition:transform .15s,border-color .15s,box-shadow .15s}
+.download .badge-icon{margin:0}.download>span:nth-child(2){flex:1}.download small{display:block;color:var(--muted);margin-top:2px}
+.download>.icon{color:var(--output);width:1.4em;height:1.4em}
+.download:hover{transform:translateY(-3px);border-color:var(--output);box-shadow:0 12px 22px -16px var(--text)}
+.download:hover .badge-icon{background:var(--output);color:var(--surface)}

@@ -1,3 +1,8 @@
+// Module 1 · First-order time response (Bashar Ghosheh)
+// [SLIDES 34] First-order sensor: τ·dy/dt + y = K·x, G(s) = K / (τs + 1).
+// [NOTES §3.1] Example 1, the thermometer, is this model with τ = RC.
+// Colours come from the shared theme through css() in module-assets/shared.js.
+
 // Get HTML elements
 var gainSlider = document.getElementById('gain');
 var tauSlider = document.getElementById('tau');
@@ -11,11 +16,15 @@ var responseTitle = document.getElementById('responseTitle');
 var errorTitle = document.getElementById('errorTitle');
 var slopeValueLabel = document.getElementById('slopeValue');
 
-var predictionInput = document.getElementById('prediction');
+var predictionInput = document.getElementById('estimate');
 var checkButton = document.getElementById('checkPrediction');
 var predictionResult = document.getElementById('predictionResult');
 var predictionPrompt = document.getElementById('predictionPrompt');
 var predictionTip = document.getElementById('predictionTip');
+
+// Largest possible answer is K·A = 3 × 10 (shared.js adds the range hint)
+predictionInput.max = 30;
+showRange(predictionInput, 0.6);
 
 var responseMetricsDiv = document.getElementById('responseMetrics');
 var logExplanationDiv = document.getElementById('logExplanation');
@@ -158,8 +167,10 @@ function updateSimulation() {
         var yVal = 0;
 
         if (isRamp) {
+            // [SLIDES 34] Ramp response: y(t) = Kr·[t − τ·(1 − e^(−t/τ))]
             yVal = gain * amplitude * (currentTime - tau * (1 - Math.exp(-currentTime / tau)));
         } else {
+            // [SLIDES 34] Step response: y(t) = KA·(1 − e^(−t/τ))
             yVal = gain * amplitude * (1 - Math.exp(-currentTime / tau));
         }
 
@@ -184,7 +195,7 @@ function updateSimulation() {
             y: inputArray,
             name: isMobile ? 'x(t)' : 'Input ramp x(t)',
             mode: 'lines',
-            line: { color: '#90a4ae', dash: 'dash', width: 2 }
+            line: { color: css('input'), dash: 'dash', width: 2 }
         };
         traces.push(inputTrace);
 
@@ -204,7 +215,7 @@ function updateSimulation() {
             y: ssOutputArray,
             name: isMobile ? 'y_ss(t)' : 'Steady-state line',
             mode: 'lines',
-            line: { color: '#2e7d32', dash: 'dot', width: 2 }
+            line: { color: css('target'), dash: 'dot', width: 2 }
         };
         traces.push(ssTrace);
 
@@ -214,7 +225,7 @@ function updateSimulation() {
             y: outputArray,
             name: isMobile ? 'y(t)' : 'Output y(t)',
             mode: 'lines',
-            line: { color: '#1565c0', width: 3 }
+            line: { color: css('output'), width: 3 }
         };
         traces.push(outputTrace);
 
@@ -228,6 +239,7 @@ function updateSimulation() {
         }
 
         var yAtRef = gain * amplitude * (tRef - tau * (1 - Math.exp(-tRef / tau)));
+        // [HW §3, Module 1] Late in a ramp the output lags by τ; the error is K·r·τ.
         var steadyStateError = gain * amplitude * tau;
         var targetY = gain * amplitude * tRef;
 
@@ -238,7 +250,7 @@ function updateSimulation() {
             y0: yAtRef,
             x1: tRef,
             y1: yAtRef,
-            line: { color: '#d84315', width: 2.2 }
+            line: { color: css('point2'), width: 2.2 }
         };
         shapes.push(lagShape);
 
@@ -250,9 +262,9 @@ function updateSimulation() {
             arrowhead: 2,
             ax: 0,
             ay: isMobile ? -20 : -26,
-            font: { color: '#d84315', size: isMobile ? 10 : 11, weight: 'bold' },
-            bgcolor: 'rgba(255,255,255,0.92)',
-            bordercolor: '#d84315',
+            font: { color: css('point2'), size: isMobile ? 10 : 11, weight: 'bold' },
+            bgcolor: css('surface'),
+            bordercolor: css('point2'),
             borderwidth: 1
         };
         annotations.push(lagAnnotation);
@@ -264,7 +276,7 @@ function updateSimulation() {
             y0: yAtRef,
             x1: tRef,
             y1: targetY,
-            line: { color: '#6a1b9a', width: 2.2 }
+            line: { color: css('point3'), width: 2.2 }
         };
         shapes.push(errorShape);
 
@@ -276,9 +288,9 @@ function updateSimulation() {
             arrowhead: 2,
             ax: isMobile ? 32 : 42,
             ay: 0,
-            font: { color: '#6a1b9a', size: isMobile ? 10 : 11, weight: 'bold' },
-            bgcolor: 'rgba(255,255,255,0.92)',
-            bordercolor: '#6a1b9a',
+            font: { color: css('point3'), size: isMobile ? 10 : 11, weight: 'bold' },
+            bgcolor: css('surface'),
+            bordercolor: css('point3'),
             borderwidth: 1
         };
         annotations.push(errorAnnotation);
@@ -292,6 +304,7 @@ function updateSimulation() {
 
         // Step response
         var finalValue = gain * amplitude;
+        // [HW §3, Module 1] 63.2% of the final value at τ and 95% at 3τ.
         var valueAtTau = finalValue * (1 - Math.exp(-1));
         var valueAt3Tau = finalValue * (1 - Math.exp(-3));
 
@@ -301,7 +314,7 @@ function updateSimulation() {
             y: [finalValue, finalValue],
             name: isMobile ? 'Final' : 'Final KA',
             mode: 'lines',
-            line: { color: '#546e7a', dash: 'dash', width: 1.8 }
+            line: { color: css('muted'), dash: 'dash', width: 1.8 }
         };
         traces.push(finalValueTrace);
 
@@ -311,7 +324,7 @@ function updateSimulation() {
             y: outputArray,
             name: isMobile ? 'y(t)' : 'Output y(t)',
             mode: 'lines',
-            line: { color: '#1565c0', width: 3 }
+            line: { color: css('output'), width: 3 }
         };
         traces.push(stepOutputTrace);
 
@@ -330,17 +343,17 @@ function updateSimulation() {
             ],
             textposition: ['top right', 'bottom right'],
             textfont: { size: isMobile ? 9 : 11 },
-            marker: { size: isMobile ? 8 : 10, color: '#c62828' }
+            marker: { size: isMobile ? 8 : 10, color: css('point1') }
         };
         traces.push(markersTrace);
 
         // Droplines for tau
-        shapes.push({ type: 'line', x0: tau, y0: 0, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
-        shapes.push({ type: 'line', x0: 0, y0: valueAtTau, x1: tau, y1: valueAtTau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: tau, y0: 0, x1: tau, y1: valueAtTau, line: { color: css('point1'), dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: 0, y0: valueAtTau, x1: tau, y1: valueAtTau, line: { color: css('point1'), dash: 'dot', width: 1.2 } });
 
         // Droplines for 3tau
-        shapes.push({ type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
-        shapes.push({ type: 'line', x0: 0, y0: valueAt3Tau, x1: 3 * tau, y1: valueAt3Tau, line: { color: '#c62828', dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: valueAt3Tau, line: { color: css('point1'), dash: 'dot', width: 1.2 } });
+        shapes.push({ type: 'line', x0: 0, y0: valueAt3Tau, x1: 3 * tau, y1: valueAt3Tau, line: { color: css('point1'), dash: 'dot', width: 1.2 } });
 
         // Metrics for step
         responseMetricsDiv.innerHTML =
@@ -352,9 +365,9 @@ function updateSimulation() {
     // Responsive layout for response plot
     var responseLayout = {
         margin: isMobile ? { l: 38, r: 10, t: 15, b: 65 } : { l: 60, r: 24, t: 24, b: 54 },
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: '#ffffff',
-        font: { family: 'sans-serif', color: '#1a2a3a', size: isMobile ? 10 : 12 },
+        paper_bgcolor: css('surface'),
+        plot_bgcolor: css('surface'),
+        font: { color: css('text'), size: isMobile ? 10 : 12 },
         legend: {
             orientation: 'h',
             y: isMobile ? -0.32 : 1.15,
@@ -364,12 +377,12 @@ function updateSimulation() {
         xaxis: {
             title: isMobile ? 't (s)' : 'Time t (seconds)',
             range: [0, maxTime],
-            gridcolor: '#eceff1'
+            gridcolor: css('edge'), zerolinecolor: css('muted')
         },
         yaxis: {
             title: isRamp ? 'y(t), x(t)' : 'Output y(t)',
             rangemode: 'tozero',
-            gridcolor: '#eceff1'
+            gridcolor: css('edge'), zerolinecolor: css('muted')
         },
         shapes: shapes,
         annotations: annotations,
@@ -383,6 +396,7 @@ function updateSimulation() {
 
 
     // Draw error plot on log axis
+    // [HW §4, step 3] The log method: ln(e(t)/e(0)) = −t/τ, a line with slope −1/τ.
     var logTimes = [];
     var logValues = [];
 
@@ -398,7 +412,7 @@ function updateSimulation() {
         y: logValues,
         name: isMobile ? 'ln(Error)' : ('ln(Error Fraction) — Slope = ' + formatNumber(-1 / tau, 2)),
         mode: 'lines',
-        line: { color: '#d84315', width: 2.5 }
+        line: { color: css('output'), width: 2.5 }
     };
 
     var logMarkersTrace = {
@@ -409,21 +423,21 @@ function updateSimulation() {
         text: ['(τ,-1)', '(2τ,-2)', '(3τ,-3)'],
         textposition: 'bottom left',
         textfont: { size: isMobile ? 8 : 11 },
-        marker: { size: isMobile ? 6 : 9, color: '#c62828' }
+        marker: { size: isMobile ? 6 : 9, color: css('point1') }
     };
 
     var logShapes = [
-        { type: 'line', x0: tau, y0: 0, x1: tau, y1: -1, line: { color: '#cfd8dc', dash: 'dash' } },
-        { type: 'line', x0: 0, y0: -1, x1: tau, y1: -1, line: { color: '#cfd8dc', dash: 'dash' } },
-        { type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: -3, line: { color: '#cfd8dc', dash: 'dash' } },
-        { type: 'line', x0: 0, y0: -3, x1: 3 * tau, y1: -3, line: { color: '#cfd8dc', dash: 'dash' } }
+        { type: 'line', x0: tau, y0: 0, x1: tau, y1: -1, line: { color: css('edge'), dash: 'dash' } },
+        { type: 'line', x0: 0, y0: -1, x1: tau, y1: -1, line: { color: css('edge'), dash: 'dash' } },
+        { type: 'line', x0: 3 * tau, y0: 0, x1: 3 * tau, y1: -3, line: { color: css('edge'), dash: 'dash' } },
+        { type: 'line', x0: 0, y0: -3, x1: 3 * tau, y1: -3, line: { color: css('edge'), dash: 'dash' } }
     ];
 
     var logLayout = {
         margin: isMobile ? { l: 38, r: 10, t: 15, b: 65 } : { l: 60, r: 24, t: 24, b: 54 },
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: '#ffffff',
-        font: { family: 'sans-serif', color: '#1a2a3a', size: isMobile ? 10 : 12 },
+        paper_bgcolor: css('surface'),
+        plot_bgcolor: css('surface'),
+        font: { color: css('text'), size: isMobile ? 10 : 12 },
         showlegend: true,
         legend: {
             orientation: 'h',
@@ -434,12 +448,12 @@ function updateSimulation() {
         xaxis: {
             title: isMobile ? 't (s)' : 'Time t (seconds)',
             range: [0, Math.min(maxTime, 4.2 * tau)],
-            gridcolor: '#eceff1'
+            gridcolor: css('edge'), zerolinecolor: css('muted')
         },
         yaxis: {
             title: isMobile ? 'ln( e / e₀ )' : 'Natural Log ln( e(t) / e(0) )',
             range: [-4.2, 0.2],
-            gridcolor: '#eceff1'
+            gridcolor: css('edge'), zerolinecolor: css('muted')
         },
         shapes: logShapes,
         autosize: true
@@ -462,32 +476,16 @@ function updateSimulation() {
 
 
     // Validation check cards
+    // [HW §3.2, check 1] y(τ) = 0.632 KA and y(3τ) = 0.95 KA.
     var calculatedTau = 1 - Math.exp(-1);
     var calculated3Tau = 1 - Math.exp(-3);
 
     var pass1 = Math.abs(calculatedTau - 0.632) < 0.002;
     var pass2 = Math.abs(calculated3Tau - 0.950) < 0.002;
 
-    var statusText1 = pass1 ? '✓ PASS' : '✗ FAIL';
-    var statusClass1 = pass1 ? 'pass' : 'fail';
-    var statusText2 = pass2 ? '✓ PASS' : '✗ FAIL';
-    var statusClass2 = pass2 ? 'pass' : 'fail';
-
     validationDiv.innerHTML =
-        '<div class="check">' +
-            '<span class="check-title">Check 1 (at t = τ)</span>' +
-            '<div class="check-row"><span>Expected:</span><span>0.632 KA</span></div>' +
-            '<div class="check-row"><span>Calculated:</span><span>' + formatNumber(calculatedTau, 3) + ' KA</span></div>' +
-            '<div class="check-row"><span>Note:</span><span>Response reaches 63.2% of steady-state KA</span></div>' +
-            '<span class="check-status ' + statusClass1 + '">' + statusText1 + '</span>' +
-        '</div>' +
-        '<div class="check">' +
-            '<span class="check-title">Check 1 (at t = 3τ)</span>' +
-            '<div class="check-row"><span>Expected:</span><span>0.950 KA</span></div>' +
-            '<div class="check-row"><span>Calculated:</span><span>' + formatNumber(calculated3Tau, 3) + ' KA</span></div>' +
-            '<div class="check-row"><span>Note:</span><span>Response reaches 95.0% of steady-state KA</span></div>' +
-            '<span class="check-status ' + statusClass2 + '">' + statusText2 + '</span>' +
-        '</div>';
+        checkRow('1 · Step at t = τ', '0.632 KA', formatNumber(calculatedTau, 3) + ' KA', pass1) +
+        checkRow('1 · Step at t = 3τ', '0.950 KA', formatNumber(calculated3Tau, 3) + ' KA', pass2);
 }
 
 
@@ -497,11 +495,7 @@ function checkPrediction() {
     var enteredValue = parseFloat(predictionInput.value);
 
     if (isNaN(enteredValue)) {
-        predictionResult.innerHTML =
-            '<div class="feedback-card incorrect">' +
-                '<span class="feedback-badge badge-error">Input Required</span>' +
-                '<span>Please enter a numerical value before clicking check.</span>' +
-            '</div>';
+        predictionResult.innerHTML = '<p class="readout warn">Enter a number before you check.</p>';
         return;
     }
 
@@ -534,36 +528,28 @@ function checkPrediction() {
         percentError = (difference / Math.abs(actualValue)) * 100;
     }
 
-    var cardClass = 'incorrect';
-    var badgeClass = 'badge-error';
-    var badgeText = 'Needs Review';
-    var assessment = 'Try using the hint above and check your calculation!';
+    var cardClass = 'bad';
+    var badgeText = 'Needs review.';
+    var assessment = 'Open the hint above and check your calculation.';
 
     if (percentError <= 2.5) {
-        cardClass = 'success';
-        badgeClass = 'badge-success';
+        cardClass = 'good';
         badgeText = 'Spot-on!';
-        assessment = 'Outstanding precision! You mastered the physical interpretation of this parameter.';
+        assessment = 'You have the physical meaning of this parameter.';
     } else if (percentError <= 10.0) {
-        cardClass = 'close';
-        badgeClass = 'badge-warning';
-        badgeText = 'Very Close!';
-        assessment = 'Great estimate! You are within 10% of the exact closed-form value.';
+        cardClass = 'warn';
+        badgeText = 'Very close.';
+        assessment = 'You are within 10% of the exact closed-form value.';
     }
 
     predictionResult.innerHTML =
-        '<div class="feedback-card ' + cardClass + '">' +
-            '<div>' +
-                '<span class="feedback-badge ' + badgeClass + '">' + badgeText + '</span>' +
-                '<strong>Your guess: ' + formatNumber(enteredValue, 2) + ' ' + units + '</strong> | ' +
-                '<span>Exact value: <strong>' + formatNumber(actualValue, 2) + ' ' + units + '</strong></span>' +
-                '<span> (Error: ' + formatNumber(percentError, 1) + '%)</span>' +
-            '</div>' +
-            '<div class="feedback-details">' +
-                '<p style="margin: 4px 0 0;">' + assessment + '</p>' +
-                '<p style="margin: 4px 0 0; font-size: 0.84rem; opacity: 0.9;"><strong>Physics:</strong> ' + explanation + '</p>' +
-            '</div>' +
-        '</div>';
+        '<p class="readout ' + cardClass + '">' +
+            '<strong>' + badgeText + '</strong> ' +
+            'Your prediction: ' + formatNumber(enteredValue, 2) + ' ' + units + '. ' +
+            'Exact value: ' + formatNumber(actualValue, 2) + ' ' + units +
+            ' (error ' + formatNumber(percentError, 1) + '%). ' + assessment +
+        '</p>' +
+        '<p>' + explanation + '</p>';
 }
 
 
@@ -579,6 +565,9 @@ inputTypeSelect.addEventListener('change', function() {
 });
 
 checkButton.addEventListener('click', checkPrediction);
+
+// Redraw with the new colours when the light/dark theme changes
+window.addEventListener('palette', updateSimulation);
 
 predictionInput.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
