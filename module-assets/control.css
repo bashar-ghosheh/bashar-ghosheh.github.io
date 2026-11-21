@@ -1,0 +1,93 @@
+/* ---- Homework 2 · Control section (control.html and the P1–P4 pages) ----
+   Builds on styles.css: same colours, cards and buttons, plus a few new pieces. */
+:root{--brake:#2255ab;--push:#00705f;--memory:#985014;--ghost:#7d8f8b}
+:root[data-theme=dark]{--brake:#95bdff;--push:#67dec2;--memory:#ffc284;--ghost:#8fa29e}
+
+/* hero */
+.control-hub .hero{background:radial-gradient(120% 140% at 100% 0%,#d7ebe3 0%,transparent 55%),linear-gradient(110deg,#ecf4e5,#deece7)}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.2rem}
+.start.ghost{background:rgba(255,255,255,.55);color:#095c50;border:1.5px solid #095c50}
+
+.curve .d2{animation-delay:.9s}.curve .d3{animation-delay:1.6s}
+.control-hub .curve .late{animation-delay:2.6s}
+
+/* three numbers */
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:15px;margin:0 0 16px}
+.stat{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--edge);border-radius:14px;padding:16px 20px;position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--output)}
+.stat:nth-child(2)::before{background:var(--target)}.stat:nth-child(3)::before{background:var(--pass)}
+.stat b{font:600 2.6rem/1 Georgia,serif;color:var(--output);min-width:2.6ch;font-variant-numeric:tabular-nums}
+.stat:nth-child(2) b{color:var(--target)}.stat:nth-child(3) b{color:var(--pass)}
+.stat span{font-weight:600;line-height:1.3}.stat small{font-weight:400;color:var(--muted)}
+
+/* block diagram */
+.loop-wrap{overflow-x:auto;margin:6px 0 4px}
+.loop{width:100%;min-width:0;height:auto;display:block}
+.loop .wire{fill:none;stroke:var(--muted);stroke-width:2}
+.loop .flow{fill:none;stroke:var(--output);stroke-width:2.5;stroke-dasharray:4 14;stroke-linecap:round;animation:flow 1.1s linear infinite;opacity:.85}
+@keyframes flow{to{stroke-dashoffset:-18}}
+.loop .arrowhead{fill:var(--muted)}
+.loop .pulse{fill:var(--target);filter:drop-shadow(0 0 4px var(--target))}
+.loop .sig{font:italic 600 17px Georgia,serif;fill:var(--text)}.loop .sig.small{font-size:15px;font-style:normal}
+.loop .tiny{font-size:11px}
+.loop .blk{cursor:pointer;outline:none}
+.loop .blk rect,.loop .blk circle{fill:var(--surface);stroke:var(--edge);stroke-width:2;transition:fill .2s,stroke .2s,transform .2s}
+.loop .blk .pillbox{fill:var(--subtle)}
+.loop .blk-t{font:700 17px system-ui,sans-serif;fill:var(--text);text-anchor:middle}.loop .blk-t.big{font-size:22px}
+.loop .blk-s{font:13px Georgia,serif;fill:var(--muted);text-anchor:middle}
+.loop .sat{fill:none;stroke:var(--target);stroke-width:2.5;stroke-linejoin:round}
+.loop .blk:hover rect,.loop .blk:hover circle,.loop .blk:focus-visible rect,.loop .blk:focus-visible circle{stroke:var(--output)}
+.loop .blk.on rect,.loop .blk.on circle{fill:var(--subtle);stroke:var(--output);stroke-width:3}
+.block-info{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:start;background:var(--subtle);border-radius:10px;padding:14px 16px;border-left:5px solid var(--output);animation:pop .3s}
+.block-info .badge-icon{grid-row:span 3;margin:0}
+.block-info h3{margin:0;font-size:1.1rem}.block-info p{margin:.2em 0}
+.block-info .chips a{background:var(--surface);border:1px solid var(--edge);border-radius:20px;padding:3px 11px;font-size:.85rem;text-decoration:none;font-weight:600}
+.block-info .chips a:hover{border-color:var(--output)}
+
+/* demo stepper */
+.stepper{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0;margin:10px 0 6px;counter-reset:s}
+.stepper button{width:100%;background:var(--subtle);color:var(--text);border:1.5px solid transparent;flex-direction:column;gap:2px;padding:8px 6px;font-size:.92rem}
+.stepper button span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--surface);border:1.5px solid var(--edge);font:600 .85rem ui-monospace,monospace}
+.stepper button[aria-pressed=true]{border-color:var(--output);background:var(--surface)}
+.stepper button[aria-pressed=true] span{background:var(--output);border-color:var(--output);color:var(--surface)}
+.story{min-height:3.2em;background:var(--subtle);border-radius:8px;padding:10px 14px;margin:6px 0 4px}
+.metrics .metric-item.good-m{outline:2px solid var(--pass)}.metrics .metric-item.bad-m{outline:2px solid var(--fail)}
+.small-note{color:var(--muted);font-size:.85rem;margin-bottom:0}
+code{font:.88em ui-monospace,monospace;background:var(--subtle);padding:1px 5px;border-radius:4px}
+pre code{display:block;padding:10px 12px;overflow-x:auto;white-space:pre;background:var(--subtle)}
+
+/* P, I, D */
+.trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin-bottom:14px}
+.term{position:relative;border:1px solid var(--edge);border-radius:12px;padding:14px 16px 12px 74px;min-height:118px;transition:transform .18s,border-color .18s}
+.term:hover{transform:translateY(-3px)}
+.term-letter{position:absolute;left:14px;top:14px;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font:700 1.5rem Georgia,serif;color:var(--surface)}
+.term.p .term-letter{background:var(--push)}.term.i .term-letter{background:var(--memory)}.term.d .term-letter{background:var(--brake)}
+.term.p:hover{border-color:var(--push)}.term.i:hover{border-color:var(--memory)}.term.d:hover{border-color:var(--brake)}
+.term p{margin:.3em 0 0;font-size:.95rem}
+.effects td.up::before{content:"▲ ";color:var(--fail)}.effects td.down::before{content:"▼ ";color:var(--pass)}
+
+/* module cards */
+.section-title{margin:26px 0 12px}
+.control-grid .card.wide{grid-column:1/-1}
+.live-chip{display:inline-block;border-radius:20px;padding:1px 9px;font-size:.78rem;font-weight:600;background:var(--subtle);color:var(--muted)}
+.live-chip.live{background:var(--pass);color:var(--surface)}
+.live-chip.soon{background:transparent;border:1px dashed var(--target);color:var(--target)}
+.control-grid .card.soon .start{background:var(--subtle);color:var(--muted)}
+
+@media(max-width:620px){
+  .stepper{grid-template-columns:repeat(2,1fr)}
+  .stat b{font-size:2.1rem}
+  .term{padding-left:70px}
+}
+
+/* Homework 1 hub: the banner that leads to the Control section */
+.hw2-banner{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;border:1px solid var(--output);border-radius:14px;padding:18px 22px;margin:0 0 16px;color:var(--text);text-decoration:none;position:relative;overflow:hidden;
+  background:linear-gradient(100deg,var(--surface) 0%,var(--surface) 55%,color-mix(in srgb,var(--output) 14%,var(--surface)) 100%);transition:transform .18s,box-shadow .18s}
+.hw2-banner:hover{transform:translateY(-3px);box-shadow:0 16px 30px -20px var(--text)}
+.hw2-banner .badge-icon{margin:0;width:58px;height:58px;background:var(--output);color:var(--surface)}
+.hw2-banner .badge-icon .icon{width:32px;height:32px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hw2-banner h2{margin:0 0 .15em;font-size:1.35rem}.hw2-banner p{margin:0;color:var(--muted)}
+.hw2-banner .tag{color:var(--target);font-weight:700;margin-right:6px;font-size:.75rem;vertical-align:.15em}
+.hw2-banner .start{pointer-events:none}
+@media(max-width:620px){.hw2-banner{grid-template-columns:auto 1fr}.hw2-banner .start{grid-column:1/-1}}

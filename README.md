@@ -1,6 +1,9 @@
-# Dynamic Characteristics Interactive Toolkit
+# ENCS4380 Interactive Toolkits: Dynamic Characteristics and PID Control
 
-Interactive web toolkit for sensor dynamic characteristics, built for **ENCS4380 Interfacing Techniques** at Birzeit University (Homework 1).
+Two interactive web toolkits built for **ENCS4380 Interfacing Techniques** at Birzeit University:
+
+1. **Dynamic Characteristics Toolkit** (Homework 1): how slow a sensor or system is. Hub: `index.html`.
+2. **PID Control Toolkit** (Homework 2): how feedback makes it faster and more accurate. Hub: `control.html`.
 
 - **Live site:** [https://bashar-ghosheh.github.io/](https://bashar-ghosheh.github.io/)
 - **Instructor:** Dr. Wasel Ghanem
@@ -11,7 +14,7 @@ A sensor never reports the present. It reports the past, smoothed. The toolkit m
 
 ---
 
-## Team members and who built what
+## Team members and who built what (Part 1)
 
 | Member | Module | Page | Status |
 | :--- | :--- | :--- | :--- |
@@ -20,7 +23,11 @@ A sensor never reports the present. It reports the past, smoothed. The toolkit m
 | **Tareq Ahmad** | Module 3: Second-order response and state space | `module3.html` | Completed |
 | **Ahmad AlSheikh** | Module 4: Guess the sensor, hub page and final integration | `module4.html`, `index.html` | Completed |
 
+> The team plan for Homework 2 (work split, grading points, dates and coding rules) is in [`HW2-TEAM-PLAN.md`](HW2-TEAM-PLAN.md), not on the public pages.
+
 ---
+
+# Part 1 · Dynamic Characteristics Toolkit
 
 ## Hub (`index.html`)
 
@@ -100,6 +107,52 @@ There are three kinds of round, picked at random:
 
 All six are shown on the hub page, and again inside the module they belong to.
 
+---
+
+# Part 2 · PID Control Toolkit
+
+Opened from the banner on the hub, or directly at `control.html`. Every module keeps the "Predict, then check" box, and every plot is simulated live in the page.
+
+## Modules and owners
+
+| Member | Module | Page | Status |
+| :--- | :--- | :--- | :--- |
+| **Bashar Ghosheh** | P1: PID playground | `control-p1.html` | In progress |
+| **Amro Qutna** | P2: A slow sensor in the loop, and My system | `control-p2.html`, `control-system.html` | In progress |
+| **Tareq Ahmad** | P3: Digital PID and the Arduino code generator | `control-p3.html` | In progress |
+| **Ahmad AlSheikh** | P4: Tuning challenge, Control hub, shared simulator, integration | `control-p4.html`, `control.html`, `pid-core.js` | Hub and simulator done, P4 in progress |
+
+## Control hub (`control.html`)
+
+- An interactive block diagram of the loop: tap a block (setpoint, error, PID, limit, plant, sensor) to read what it does and which module explores it.
+- "Feel the loop": the four steps of the lecture on a second-order plant (K = 1, ζ = 0.7, ωn = 2 rad/s): no control, add P, add I, add D, with live rise time, overshoot, settling time and steady-state error.
+- A "Predict, then check" question on the P-only final value.
+- P, I and D in plain words, and the table of what each gain does.
+- Cards for the five pages. Each card checks whether its page is online yet.
+- The three validation checks, computed by the shared simulator.
+
+## Shared simulator (`pid-core.js`)
+
+The homework asks for a time-stepping solver, not a closed form. Every Control page uses this one file, so all pages agree on the numbers.
+
+- `simulate({...})` steps the closed loop with **RK4** (1 ms by default). Options: plant, `Kp`, `Ki`, `Kd`, setpoint `r`, sensor `tauS`, limits `uMin`/`uMax`, sampling time `Ts` (digital PID with zero-order hold), `antiWindup`.
+- The PID is the digital law of the sheet, $u[k] = K_p e[k] + K_i T_s \sum e[j] + K_d (e[k]-e[k-1])/T_s$. A continuous PID is the same law updated every step.
+- `loopMetrics(t, y)`: 10–90% rise time, overshoot, 2% settling time, steady-state error, and whether the run settled.
+- `theoryP`, `theoryPI`, `designPI` (gains from a chosen ζ and ωn), `theorySensorPI` (largest stable Ki with a slow sensor).
+- `validationChecks()`: the three checks below.
+
+## Validation checks (PID)
+
+For the plant $K/(\tau s+1)$ with $K = 1$, $\tau = 1$ s:
+
+| # | Check | Expected | Simulated |
+| :--- | :--- | :--- | :--- |
+| 1 | P only, $K_p = 9$ | $\tau_{cl} = 0.1$ s, $e_{ss} = 10\%$ | 0.100 s, 10.0% |
+| 2 | PI, $K_p = K_i = 1$ | $\omega_n = 1$ rad/s, $\zeta = 1$ | 1.00 rad/s, 1.00, no overshoot |
+| 3 | Any PI | zero steady-state error | largest $\lvert e_{ss}\rvert$ = 5.6e-6 over 4 gain pairs |
+
+---
+
 ## Screenshots
 
 ### Module 1: step and ramp
@@ -130,6 +183,11 @@ All six are shown on the hub page, and again inside the module they belong to.
 | `module-assets/` | Shared theme, icons, plot helper, graph reader and quiz |
 | `resources/` | Lecture slides and State-Space notes, offered for download on the hub |
 | `*.test.js` | Numerical tests |
+| `control.html`, `control.js` | PID Control hub: block diagram, live demo, validation board |
+| `control-p1.html` … `control-p4.html`, `control-system.html` | The PID modules and the applied design (being added) |
+| `pid-core.js` | Shared closed-loop simulator (RK4), metrics and PID theory |
+| `module-assets/control.css` | Extra styles for the Control section |
+| `HW2-TEAM-PLAN.md` | Team plan for Homework 2 |
 
 ## How to run
 
@@ -139,8 +197,10 @@ All six are shown on the hub page, and again inside the module they belong to.
 Run the numerical tests from the repository root (Node 18 or newer):
 
 ```sh
-node --test frequency.test.js second-order.test.js sensor-game.test.js notes-check.test.js
+node --test frequency.test.js second-order.test.js sensor-game.test.js notes-check.test.js pid-core.test.js
 ```
+
+`pid-core.test.js` checks the simulator against the three PID validation checks, closed-form closed-loop responses, the Module 3 second-order formula, the Routh limit for a slow sensor, saturation, anti-windup and the effect of the sampling time.
 
 `notes-check.test.js` compares every closed-form formula in the toolkit with the RK4 simulator and the `eig2` function from Section 7.1 of the State-Space Modeling notes. The Module 4 test also plays 1200 random rounds as a "careful student" using the lecture methods, to confirm the game is fair.
 
@@ -154,3 +214,4 @@ In accordance with the course guidelines (Section 8):
 - **Module 2:** Codex assisted with implementation, packaging and verification. Amro Qutna is responsible for reviewing and explaining the module's code and equations.
 - **Module 3:** Codex assisted with implementation, packaging, numerical verification and repository integration. Tareq Ahmad is responsible for reviewing and explaining the module's code and equations.
 - **Module 4, hub and integration:** Claude assisted with the implementation of Module 4 and the hub page, moving Module 1 to the shared theme, browser testing and this README. Ahmad AlSheikh is responsible for reviewing and explaining the module's code and equations.
+- **PID Control hub and `pid-core.js` (Homework 2):** Claude assisted with the shared simulator and its tests, the Control hub page and this README. Ahmad AlSheikh is responsible for reviewing and explaining this code and its equations.

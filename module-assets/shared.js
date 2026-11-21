@@ -134,7 +134,8 @@ if (page) {
     stored('encs-done-' + page, done ? 'yes' : 'no');
     completion(done);
   };
-} else {
+} else if (el('progress') && el('status1')) {
+  // Homework 1 hub only. The Control hub (control.html) has no module progress.
   function progress() {
     const done = [1, 2, 3, 4].filter((n) => stored('encs-done-' + n) === 'yes');
     el('progress').value = done.length;
