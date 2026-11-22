@@ -1,0 +1,103 @@
+/* P2's tuning surface shares the toolkit palette and light/dark switch. */
+:root {
+  --paper: #f5f6f2;
+  --rail: #173e36;
+  --rail-line: #436358;
+  --rail-ink: #f1f7e9;
+  --rail-accent: #c6e889;
+  --divider: color-mix(in srgb, var(--edge) 62%, var(--surface));
+}
+:root[data-theme=dark] { --paper: #101e1e; --rail: #193832; }
+body { background: var(--paper); }
+main, footer, .bar { width: min(1190px, 94%); }
+main { padding: 0 0 32px; }
+.intro { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px; padding: 28px 0 22px; }
+.intro .eyebrow { color: var(--output); font-size: .75rem; text-transform: uppercase; letter-spacing: .095em; margin: 0 0 7px; }
+.intro h1 { margin: 0; font-size: clamp(2.05rem,4vw,3.75rem); }
+.intro p:last-child { margin: 8px 0 0; color: var(--muted); }
+.sensor-function { border-left: 2px solid var(--edge); padding: 0 10px 0 24px; min-width: 200px; }
+.sensor-function > span, .rail-title, .key { font-weight: 600; }
+.sensor-function > span { display: block; color: var(--muted); font-size: .81rem; margin-bottom: 6px; }
+#liveSensor { color: var(--output); min-height: 43px; }
+.section-links { display: flex; gap: 4px 20px; padding: 0 0 8px; border-bottom: 1px solid var(--edge); margin-bottom: 20px; }
+.section-links a { display: inline-flex; align-items: center; min-height: 38px; font-size: .9rem; color: var(--muted); font-weight: 600; text-decoration: none; }
+.section-links a:hover { color: var(--output); text-decoration: underline; }
+.bench { display: grid; grid-template-columns: minmax(230px,25%) minmax(0,1fr); border: 1px solid var(--edge); border-radius: 16px; margin-bottom: 22px; background: var(--surface); box-shadow: 0 5px 20px #12271d09; }
+.settings { color: var(--rail-ink); background: var(--rail); border-radius: 15px 0 0 15px; padding: 21px clamp(15px,2vw,26px); }
+.rail-title { display: flex; align-items: center; gap: 10px; }
+.rail-title .icon { color: var(--rail-accent); }
+.rail-title h2 { margin: 0; font: 650 1.2rem/1.3 system-ui,sans-serif; }
+.dial { display: grid; grid-template-columns: 1fr 4.6em; align-items: center; gap: 0 4px; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--rail-line); }
+.dial > label:first-child { grid-area: 1 / 1; font-size: .9rem; }
+.dial > label span { color: #c5d9cb; font-weight: 400; margin-left: 3px; white-space: nowrap; }
+.dial .parameter-entry { grid-area: 1 / 2; margin: 0; display: block; font-size: 0; }
+.dial .parameter-entry input { width: 100%; min-height: 34px; background: #0e302a; color: #f0ffd6; border: 1px solid #678577; font: 600 .95rem/1.1 ui-monospace,Consolas,monospace; padding: 5px 6px; text-align: center; font-variant-numeric: tabular-nums; }
+.dial .field-range { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.dial input[type=range] { grid-area: 2 / 1 / 3 / -1; min-height: 25px; margin: 0; border: 0; background: transparent; accent-color: var(--rail-accent); cursor: pointer; }
+.limits { grid-area: 3 / 1 / 4 / -1; display: flex; justify-content: space-between; color: #c5d9cb; font: .72rem/1.2 ui-monospace,Consolas,monospace; }
+.settings #reset { margin-top: 17px; background: transparent; color: var(--rail-ink); border: 1px solid #719184; width: 100%; min-height: 37px; font-size: .86rem; }
+.response { min-width: 0; padding: 22px clamp(14px,2vw,30px) 15px; }
+h2 { letter-spacing: -.025em; }
+.presets { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 14px; }
+.presets button { background: var(--surface); border: 1px solid var(--edge); color: var(--muted); border-radius: 20px; min-height: 33px; font-size: .82rem; padding: 4px 13px; }
+.presets button[aria-pressed=true] { background: var(--button); border-color: var(--button); color: var(--onbutton); }
+.key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .77rem; color: var(--muted); margin: 9px 0 3px; }
+.key span::before { content: ''; display: inline-block; width: 21px; border-top: 3px solid var(--output); vertical-align: middle; margin-right: 7px; }
+.key .sensor::before { border-color: var(--input); border-top-style: dashed; }
+.key .target::before { border-color: var(--target); border-top-style: dotted; }
+#speedPlot { height: clamp(230px,29vh,325px); }
+.scoreboard { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; border-top: 1px solid var(--divider); padding-top: 13px; margin-top: 9px; }
+.scoreboard .metric-item { padding: 0; padding-left: 10px; border-left: 2px solid var(--edge); background: transparent; border-radius: 0; color: var(--muted); font-size: .78rem; }
+.scoreboard .metric-item:first-child { border-color: var(--output); }
+.scoreboard .metric-item strong { display: block; color: var(--text); font-size: clamp(1rem,1.7vw,1.45rem); line-height: 1.2; margin: 4px 0 0; font-variant-numeric: tabular-nums; }
+#observation { margin: 14px 0 0; color: var(--muted); font-size: .91rem; }
+.card, .model { border-color: var(--divider); padding: clamp(16px,2.3vw,29px); }
+.predictions, .equations, #p2Checks { display: grid; gap: 14px; }
+.predictions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.predictions form { display: flex; flex-wrap: wrap; align-content: flex-start; align-items: flex-end; gap: 8px; padding: 16px; border-radius: 10px; background: var(--page); }
+.predictions label { width: 100%; }
+.predictions p { width: 100%; margin: 5px 0 0; }
+.predictions p:empty, #checkCount:empty { display: none; }
+#p2Checks { grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr)); }
+#p2Checks .check { padding: 15px; gap: 8px; }
+#p2Checks .check span { color: var(--muted); font-size: .9rem; }
+#p2Checks .check-status { display: block; align-self: stretch; border-top: 1px solid var(--edge); padding-top: 8px; }
+#poleCheck { white-space: pre-line; }
+#poleCheck::first-line { font-weight: 750; letter-spacing: .045em; }
+.model summary { font-size: 1.15rem; }
+.equations { grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); margin: 18px 0; }
+.equations article { min-width: 0; background: var(--page); border-radius: 8px; padding: 14px; }
+.equations h3 { color: var(--muted); font: 600 .9rem/1.5 system-ui,sans-serif; margin-bottom: 14px; }
+.equations article > div { overflow-x: auto; padding: 4px 1px 8px; font-size: .9rem; }
+.equations p { font-size: .9rem; margin-bottom: 0; }
+#bonus select { margin-top: 5px; }
+#bonusPlot { height: 300px; margin-top: 12px; }
+#experiment, #verify-title, #predictTitle, #bonus, #model { scroll-margin-top: 8rem; }
+@media (max-width: 740px) {
+  .intro { grid-template-columns: 1fr; }
+  .sensor-function { display: flex; align-items: center; gap: 14px; padding: 0; border: 0; }
+  .sensor-function > span { margin: 0; }
+  .section-links { gap: 2px 15px; }
+  .bench { grid-template-columns: 1fr; }
+  .settings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px 20px; border-radius: 15px 15px 0 0; }
+  .rail-title { grid-area: 1 / 1; }
+  .settings #reset { grid-area: 1 / 2; margin: 0; justify-self: end; width: auto; }
+  .dial { margin-top: 0; }
+  .predictions { grid-template-columns: 1fr; }
+}
+@media (max-width: 495px) {
+  .settings { padding: 12px; gap: 10px; }
+  .dial { grid-template-columns: minmax(0,1fr) 3.7rem; }
+  .dial input[type=number] { appearance: textfield; }
+  .dial input[type=number]::-webkit-inner-spin-button { appearance: none; }
+  .intro { padding: 16px 0 8px; gap: 8px; }
+  .section-links { flex-wrap: nowrap; overflow-x: auto; gap: 14px; margin-bottom: 12px; }
+  .section-links a { flex: none; }
+  .dial > label:first-child { font-size: .77rem; }
+  .dial > label span { display: block; margin: 0; }
+  .dial .parameter-entry input { font-size: .85rem; }
+  .response { padding: 16px 12px; }
+  .presets button { font-size: .76rem; padding: 3px 9px; }
+  .scoreboard { gap: 6px; }
+  .scoreboard .metric-item { padding-left: 5px; }
+}

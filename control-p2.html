@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>A slow sensor in the loop · ENCS4380 P2</title>
+  <script src="module-assets/theme.js"></script>
+  <link rel="stylesheet" href="module-assets/styles.css">
+  <link rel="stylesheet" href="module-assets/control.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="module-assets/control-p2.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="module-assets/icons.js"></script>
+  <script defer src="module-assets/shared.js"></script>
+  <script defer src="pid-core.js"></script>
+  <script defer src="second-order.js"></script>
+  <script defer src="control-p2.js"></script>
+</head>
+<body>
+<header class="top"><div class="bar">
+  <nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html"><i data-icon="loop"></i>Control</a><a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control-p2.html" aria-current="page" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav>
+  <button id="theme">Theme</button>
+</div></header>
+<main>
+  <header class="intro">
+    <div><p class="eyebrow">ENCS4380 &nbsp;/&nbsp; Control &nbsp;/&nbsp; P2</p>
+      <h1>A slow sensor in the loop</h1>
+      <p>Compare the speed of the wheel with the speed its controller sees.</p></div>
+    <div class="sensor-function"><span>Feedback sensor</span><div id="liveSensor"></div></div>
+  </header>
+  <nav class="section-links" aria-label="On this page">
+    <a href="#experiment">Wheel response</a><a href="#predictTitle">Predictions</a><a href="#verify-title">Verify P2</a><a href="#model">Equations</a><a href="#bonus">Pole placement</a>
+  </nav>
+  <section class="bench" aria-labelledby="experiment">
+    <aside class="settings" aria-labelledby="tuneTitle">
+      <div class="rail-title"><i data-icon="sliders"></i><h2 id="tuneTitle">Tune the loop</h2></div>
+        <div class="dial">
+          <label for="tauS">Sensor lag <span>τ<sub>s</sub> · s</span></label>
+          <input id="tauS" type="range" min="0" max="2" step="0.05" value="0.25">
+          <span class="limits" aria-hidden="true"><span>0</span><span>2</span></span>
+        </div>
+        <div class="dial">
+          <label for="Kp">Proportional <span>K<sub>p</sub></span></label>
+          <input id="Kp" type="range" min="0" max="6" step="0.1" value="1">
+          <span class="limits" aria-hidden="true"><span>0</span><span>6</span></span>
+        </div>
+        <div class="dial">
+          <label for="Ki">Integral <span>K<sub>i</sub></span></label>
+          <input id="Ki" type="range" min="0" max="8" step="0.1" value="4">
+          <span class="limits" aria-hidden="true"><span>0</span><span>8</span></span>
+        </div>
+        <div class="dial">
+          <label for="Kd">Derivative <span>K<sub>d</sub></span></label>
+          <input id="Kd" type="range" min="0" max="0.5" step="0.05" value="0">
+          <span class="limits" aria-hidden="true"><span>0</span><span>0.5</span></span>
+        </div>
+      <button id="reset"><i data-icon="loop"></i>Reset experiment</button>
+    </aside>
+    <div class="response">
+      <h2 id="experiment">Wheel speed response</h2>
+      <div class="presets" aria-label="Sensor lag presets">
+        <button data-lag="0">Ideal · 0 s</button><button data-lag="0.25">Short · 0.25 s</button><button data-lag="1">Long · 1 s</button><button data-lag="1.5">Longer · 1.5 s</button>
+      </div>
+      <div class="key"><span class="true">True speed y</span><span class="sensor">Sensor reading yₘ</span><span class="target">Target r = 1</span></div>
+      <div id="speedPlot" role="img" aria-label="True wheel speed and sensor reading against a unit step over 12 seconds"></div>
+      <div class="scoreboard">
+        <div class="metric-item">Peak above target<strong id="peak"></strong></div>
+        <div class="metric-item">Reading at first crossing<strong id="atTarget"></strong></div>
+        <div class="metric-item">Predicted behavior<strong id="regime"></strong></div>
+      </div>
+      <p id="observation" aria-live="polite"></p>
+    </div>
+  </section>
+  <section class="card">
+    <h2 id="predictTitle">Predict, then check</h2>
+    <p>Keep K<sub>p</sub> = 1, K<sub>i</sub> = 4 and K<sub>d</sub> = 0. Make a prediction, then run each experiment.</p>
+    <div class="predictions"><form id="predictLag"><label for="lagAnswer">With a 0.25 s sensor, what does it read when the wheel first reaches 1?</label>
+      <select id="lagAnswer" required><option value="">Choose a prediction</option><option value="below">Below 1</option><option value="equal">Exactly 1</option><option value="above">Above 1</option></select>
+      <button>Check short lag</button><p id="lagFeedback" aria-live="polite"></p></form>
+    <form id="predictWave"><label for="waveAnswer">At a sensor lag of 1.5 s, what happens to successive swings?</label>
+      <select id="waveAnswer" required><option value="">Choose a prediction</option><option value="decay">They shrink</option><option value="same">They stay the same size</option><option value="grow">They grow</option></select>
+      <button>Check longer lag</button><p id="waveFeedback" aria-live="polite"></p></form></div>
+  </section>
+  <section class="card" aria-labelledby="verify-title">
+    <h2 id="verify-title"><i data-icon="checklist"></i>Verify P2</h2>
+    <p>Run the four sensor presets with the reference gains. Compare each measured result with the expected behavior. Your current experiment stays on screen.</p>
+    <button id="runChecks">Run P2 checks</button>
+    <p id="checkCount" role="status"></p>
+    <div id="p2Checks" class="validation"></div>
+  </section>
+  <details class="model" id="model">
+    <summary>Motor, sensor and controller equations</summary>
+    <div class="equations">
+      <article><h3>Motor</h3><div id="motorEq"></div><p>The normalized motor has unit gain and a 1 s time constant.</p></article>
+      <article><h3>Sensor</h3><div id="sensorEq"></div><p>The <a href="module2.html">HW1 sensor</a> measures wheel speed. At zero lag its reading equals the true speed.</p></article>
+      <article><h3>PID controller</h3><div id="pidEq"></div><p>The motor command depends on the difference between target speed and sensor reading.</p></article>
+    </div>
+    <p>The simulation applies a unit step with unrestricted drive and advances the motor and sensor using RK4 at 1 ms intervals. With the reference gains, swings decay below 1 s of sensor lag, persist at 1 s, and grow above 1 s.</p>
+  </details>
+  <section class="card" id="bonus" aria-labelledby="bonus-title">
+    <h2 id="bonus-title">State-space pole placement</h2>
+    <p>Pull the <a href="module3.html">mass from Module 3</a> one metre to the right and release it from rest. Choose the poles that set how it returns to zero. Both curves start from the same position and velocity.</p>
+    <label for="poleChoice">Requested closed-loop poles (s⁻¹)</label>
+    <select id="poleChoice">
+      <option value="distinct">−3 and −4 · two decay rates</option>
+      <option value="repeated">−3 and −3 · critical damping</option>
+      <option value="complex">−2 ± 3j · decaying oscillation</option>
+    </select>
+    <div id="bonusPlot" role="img" aria-label="Displacement after release with and without state feedback"></div>
+    <div class="key"><span class="true">With state feedback</span><span class="sensor">Freely moving mass</span></div>
+    <div class="metrics scoreboard">
+      <div class="metric-item">Position gain<strong id="positionGain"></strong></div>
+      <div class="metric-item">Velocity gain<strong id="velocityGain"></strong></div>
+      <div class="metric-item">Calculated poles (s⁻¹)<strong id="actualPoles"></strong></div>
+    </div>
+    <p id="poleCheck" role="status"></p>
+    <details><summary>How these gains place the poles</summary>
+      <p>The 1 kg mass has damping of 2 N·s/m and spring stiffness of 4 N/m. The controller reads both position and velocity immediately.</p>
+      <div class="equations">
+        <article><h3>Mechanical plant</h3><div id="massEq"></div></article>
+        <article><h3>Feedback force</h3><div id="forceEq"></div></article>
+        <article><h3>Closed-loop poles</h3><div id="polyEq"></div></article>
+      </div>
+      <p>Match the closed-loop polynomial to the requested roots. For −3 and −4, the target coefficients are 7 and 12, giving a position gain of 8 and a velocity gain of 5. The check calculates the eigenvalues of the resulting system matrix.</p>
+    </details>
+  </section>
+</main>
+<footer>Birzeit University · ENCS4380 Interfacing Techniques · Amro Qutna</footer>
+</body>
+</html>
