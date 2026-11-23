@@ -6,7 +6,7 @@
 <script defer src="module-assets/shared.js"></script>
 <script defer src="pid-core.js"></script>
 <script defer src="control.js"></script></head>
-<body class="control-hub"><header class="top"><div class="bar"><nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html" aria-current="page"><i data-icon="loop"></i>Control</a><a href="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav><button id="theme">Theme</button></div></header><main>
+<body class="control-hub"><header class="top"><div class="bar"><nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html" aria-current="page"><i data-icon="loop"></i>Control</a><a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control.html#modules" data-module-page="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav><button id="theme">Theme</button></div></header><main>
 
 <section class="hero"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · INTERFACING TECHNIQUES · TOOLKIT 2 OF 2</p><h1>PID Control Toolkit</h1><p class="credit">Bashar Ghosheh · Amro Qutna · Tareq Ahmad · Ahmad AlSheikh · Dr. Wasel Ghanem</p><p class="lead">The <a href="index.html">Dynamic Characteristics Toolkit</a> shows how slow a system is. This toolkit makes it <em>faster</em> and <em>more accurate</em>, using feedback. Measure the output, compare it with the target, and push.</p><div class="hero-actions"><a class="start" href="#demo"><i data-icon="play"></i>Feel the loop</a><a class="start ghost" href="#modules"><i data-icon="arrow"></i>Open the modules</a></div></div>
 <div class="hero-art always"><svg class="curve" viewBox="0 0 360 215" role="img" aria-label="Three step responses of the plant 1/(s+1): open loop is slow, P only is ten times faster but stops at 90 percent, PI is fast and reaches the target">
@@ -81,13 +81,20 @@
   </tbody></table></div>
 </section>
 
+<section class="card"><h2><i data-icon="play"></i>Start here</h2>
+  <ol><li>Play with <b>Feel the loop</b> above until the four steps make sense.</li>
+    <li>Open the modules in order. Each one takes about ten minutes, and each starts with a prediction: guess first, then move the sliders to check.</li>
+    <li>Finish with the <b>Tuning challenge</b>, where you tune a hidden plant on your own, and see a real design in <b>Our micromouse drive motor</b>.</li></ol>
+  <p class="small-note">New to time constants and damping? Start with the <a href="index.html">Dynamic Characteristics Toolkit</a>: every plant and sensor here comes from it.</p>
+</section>
+
 <h2 class="section-title" id="modules"><i data-icon="grid"></i>The modules</h2>
 <div class="grid control-grid">
-  <article class="card" data-page="control-p1.html"><span class="badge-icon"><i data-icon="sliders"></i></span><p class="eyebrow">P1 · 20 POINTS</p><h3>PID playground</h3><p>Pick a first- or second-order plant, move K<sub>p</sub>, K<sub>i</sub> and K<sub>d</sub>, and watch rise time, overshoot, settling time and error change live, with the control-signal limit.</p><p class="status">Bashar Ghosheh · <span class="live-chip">checking…</span></p><a class="start" href="control-p1.html">Open P1<i data-icon="arrow"></i></a></article>
-  <article class="card" data-page="control-p2.html"><span class="badge-icon"><i data-icon="eyeLag"></i></span><p class="eyebrow">P2 · 15 POINTS</p><h3>A slow sensor in the loop</h3><p>Put a first-order sensor in the feedback path. As τ<sub>s</sub> grows, the true output and the reading drift apart, until the loop oscillates.</p><p class="status">Amro Qutna · <span class="live-chip">checking…</span></p><a class="start" href="control-p2.html">Open P2<i data-icon="arrow"></i></a></article>
-  <article class="card" data-page="control-p3.html"><span class="badge-icon"><i data-icon="chip"></i></span><p class="eyebrow">P3 · 15 POINTS</p><h3>Digital PID</h3><p>Sample every T<sub>s</sub> like an Arduino does. See the stair-step control signal, break the loop with a slow sample rate, try anti-windup, and copy the code.</p><p class="status">Tareq Ahmad · <span class="live-chip">checking…</span></p><a class="start" href="control-p3.html">Open P3<i data-icon="arrow"></i></a></article>
-  <article class="card" data-page="control-p4.html"><span class="badge-icon"><i data-icon="target"></i></span><p class="eyebrow">P4 · 10 POINTS</p><h3>Tuning challenge</h3><p>A hidden random plant, borrowed from Guess the sensor, and a spec to meet. Tune the gains and pass every line of the spec for a high score.</p><p class="status">Ahmad AlSheikh · <span class="live-chip">checking…</span></p><a class="start" href="control-p4.html">Open P4<i data-icon="arrow"></i></a></article>
-  <article class="card wide" data-page="control-system.html"><span class="badge-icon"><i data-icon="motor"></i></span><p class="eyebrow">MY SYSTEM · 15 POINTS</p><h3>Our micromouse drive motor</h3><p>K and τ from a real PWM step test with the encoder, a speed-loop spec with 0.6 ≤ ζ ≤ 0.8 and PWM inside 0–100%, the final gains, and the Arduino code we would flash.</p><p class="status">Whole team · <span class="live-chip">checking…</span></p><a class="start" href="control-system.html">Open My system<i data-icon="arrow"></i></a></article>
+  <article class="card" data-page="control-p1.html"><span class="badge-icon"><i data-icon="sliders"></i></span><p class="eyebrow">P1 · PLAYGROUND</p><h3>PID playground</h3><p>Pick a first- or second-order plant, move K<sub>p</sub>, K<sub>i</sub> and K<sub>d</sub>, and watch rise time, overshoot, settling time and error change live, with the control-signal limit.</p><p class="status">Bashar Ghosheh</p><a class="start" href="control-p1.html">Open P1<i data-icon="arrow"></i></a></article>
+  <article class="card" data-page="control-p2.html"><span class="badge-icon"><i data-icon="eyeLag"></i></span><p class="eyebrow">P2 · SENSING</p><h3>A slow sensor in the loop</h3><p>Put a first-order sensor in the feedback path. As τ<sub>s</sub> grows, the true output and the reading drift apart, until the loop oscillates.</p><p class="status">Amro Qutna</p><a class="start" href="control-p2.html">Open P2<i data-icon="arrow"></i></a></article>
+  <article class="card" data-page="control-p3.html"><span class="badge-icon"><i data-icon="chip"></i></span><p class="eyebrow">P3 · DIGITAL</p><h3>Digital PID</h3><p>Sample every T<sub>s</sub> like an Arduino does. See the stair-step control signal, break the loop with a slow sample rate, try anti-windup, and copy the code.</p><p class="status">Tareq Ahmad</p><a class="start" href="control-p3.html">Open P3<i data-icon="arrow"></i></a></article>
+  <article class="card" data-page="control-p4.html"><span class="badge-icon"><i data-icon="target"></i></span><p class="eyebrow">P4 · CHALLENGE</p><h3>Tuning challenge</h3><p>A hidden random plant, borrowed from Guess the sensor, and a spec to meet. Tune the gains and pass every line of the spec for a high score.</p><p class="status">Ahmad AlSheikh</p><a class="start" href="control-p4.html">Open P4<i data-icon="arrow"></i></a></article>
+  <article class="card wide" data-page="control-system.html"><span class="badge-icon"><i data-icon="motor"></i></span><p class="eyebrow">APPLIED DESIGN</p><h3>Our micromouse drive motor</h3><p>K and τ of our N20 gear motor from its datasheet, a speed-loop spec with 0.6 ≤ ζ ≤ 0.8 and PWM inside 0–100%, the PI gains and simulated response, the Arduino code, and a step-test fitter for when the robot is built.</p><p class="status">All four authors</p><a class="start" href="control-system.html">Open My system<i data-icon="arrow"></i></a></article>
 </div>
 
 <section class="card"><h2><i data-icon="checklist"></i>Validation checks</h2>
@@ -96,37 +103,6 @@
   <p id="checkSummary" class="readout" role="status"></p>
 </section>
 
-<section class="card"><h2><i data-icon="flag"></i>Road to v2.0</h2>
-  <ol class="timeline" id="timeline">
-    <li data-date="2026-11-16"><b>Mon 16 Nov</b><span>Homework released</span></li>
-    <li data-date="2026-11-19"><b>Thu 19 Nov</b><span>Checkpoint: P1 and P2 live</span></li>
-    <li data-date="2026-11-23"><b>Mon 23 Nov</b><span>Release tagged v2.0</span></li>
-    <li data-date="2026-11-24"><b>From Tue 24 Nov</b><span>Demos, 10 minutes per group</span></li>
-  </ol>
-</section>
 
-<section class="card"><h2><i data-icon="users"></i>Who builds what</h2>
-  <div class="table-scroll"><table class="team"><thead><tr><th>Member</th><th>PID Control Toolkit work</th></tr></thead><tbody>
-    <tr><td>Bashar Ghosheh</td><td><a href="control-p1.html">P1 · PID playground</a></td></tr>
-    <tr><td>Amro Qutna</td><td><a href="control-p2.html">P2 · A slow sensor in the loop</a>, <a href="control-system.html">My system</a></td></tr>
-    <tr><td>Tareq Ahmad</td><td><a href="control-p3.html">P3 · Digital PID</a> and the Arduino code generator</td></tr>
-    <tr><td>Ahmad AlSheikh</td><td><a href="control-p4.html">P4 · Tuning challenge</a>, Control hub, shared simulator and release</td></tr>
-  </tbody></table></div>
-  <details class="dev-notes"><summary><i data-icon="code"></i>Building a module? Start here</summary>
-    <ol>
-      <li>Name your page as in the cards above (<code>control-p1.html</code> … <code>control-system.html</code>) and copy the header and nav from this page.</li>
-      <li>Load the shared simulator. Never write a second one: every page must agree on the numbers.
-<pre><code>&lt;script defer src="pid-core.js"&gt;&lt;/script&gt;
-
-const run = simulate({ plant: firstOrder(1, 1), Kp: 9, Ki: 0, Kd: 0,
-                       tauS: 0, uMin: 0, uMax: 100, Ts: null, antiWindup: false, T: 10 });
-const m = loopMetrics(run.t, run.y);   // rise, overshoot, settle, ess, settled
-// run.y = true output, run.ym = sensor reading, run.u = control signal</code></pre></li>
-      <li>Use <code>plot()</code>, <code>trace()</code> and <code>checkRow()</code> from <code>shared.js</code> so the page matches the theme.</li>
-      <li>Keep a <b>Predict, then check</b> box, and cite the lecture in your comments like the Dynamic Characteristics Toolkit files do.</li>
-      <li>Run the tests before you push: <code>node --test pid-core.test.js</code>. Then close your GitHub issue.</li>
-    </ol>
-  </details>
-</section>
 
 </main><footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>Bashar Ghosheh · Amro Qutna · Tareq Ahmad · Ahmad AlSheikh</footer></body></html>

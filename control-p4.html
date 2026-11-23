@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tuning challenge · PID Control Toolkit · ENCS4380</title>
+<script src="module-assets/theme.js"></script><link rel="stylesheet" href="module-assets/styles.css"><link rel="stylesheet" href="module-assets/control.css"><link rel="stylesheet" href="module-assets/control-p4.css">
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script defer src="module-assets/icons.js"></script>
+<script defer src="module-assets/shared.js"></script>
+<script defer src="pid-core.js"></script>
+<script defer src="frequency.js"></script>
+<script defer src="second-order.js"></script>
+<script defer src="sensor-game.js"></script>
+<script defer src="tuning-challenge.js"></script>
+<script defer src="control-p4.js"></script></head>
+<body class="control-hub p4"><header class="top"><div class="bar"><nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html"><i data-icon="loop"></i>Control</a><a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control.html#modules" data-module-page="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control-p4.html" aria-current="page" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav><button id="theme">Theme</button></div></header><main>
+
+<section class="hero"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · PID CONTROL · P4</p><h1>Tuning challenge</h1><p class="credit">Ahmad AlSheikh · Dr. Wasel Ghanem</p><p class="lead">A plant you have never seen is on the bench. You get one noisy step test, a spec to meet and three gains. Read the plant, tune the loop, then test it against the spec.</p></div>
+<div class="hero-art always"><svg class="curve" viewBox="0 0 360 215" role="img" aria-label="A step response that stays under the overshoot ceiling and enters the settling band before the deadline">
+  <rect x="30" y="20" width="315" height="22" fill="#a72d32" opacity=".12"/><path d="M30 42h315" stroke="#a72d32" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="200" y="44" width="145" height="12" fill="#14623e" opacity=".18"/><path d="M200 20v170" stroke="#985014" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <path d="M30 20v170h315" fill="none" stroke="#153631" stroke-width="1.5"/><path d="M30 50h315" stroke="#15599b" stroke-width="2" stroke-dasharray="6 5"/>
+  <path class="draw" pathLength="1" d="M30 190C60 150 80 60 112 46S160 52 190 50 260 50 345 50" fill="none" stroke="#00705f" stroke-width="3.5" stroke-linecap="round"/>
+  <g class="late"><text x="36" y="35" font-size="12" fill="#a72d32">overshoot ceiling</text><text x="206" y="74" font-size="12" fill="#14623e">±2% band</text><text x="206" y="184" font-size="12" fill="#985014">settling deadline</text><circle cx="300" cy="50" r="9" fill="#14623e"/><path d="M295 50l4 4 7-8" stroke="#fff" stroke-width="2" fill="none"/></g>
+</svg></div></section>
+
+<details open><summary><i data-icon="play"></i>How to play</summary><ol class="how">
+  <li><b>Read the plant.</b> The bench shows the hidden plant's answer to a unit step, with no controller. Is it first or second order? Estimate its numbers, as in <a href="module4.html">Guess the sensor</a>.</li>
+  <li><b>Tune.</b> Set K<sub>p</sub>, K<sub>i</sub> and K<sub>d</sub>. The closed loop stays hidden until you test.</li>
+  <li><b>Test.</b> The page simulates your loop on the true plant and marks each line of the spec PASS or FAIL. The first three tests are free, each later test costs 5% of the score.</li>
+  <li><b>Reveal.</b> See the true plant and one set of gains that works, with the working.</li>
+</ol><p>Want to explore first? Turn on <b>Live preview</b>: the curve follows the sliders, and the round becomes a practice round with no score.</p></details>
+
+<section class="card mission" id="mission"><div class="case"><h2><i data-icon="dice"></i><span id="roundTitle">Hidden plant</span></h2>
+  <div class="level" role="radiogroup" aria-label="Level"><button type="button" role="radio" data-level="easy">Easy</button><button type="button" role="radio" data-level="normal">Normal</button><button type="button" role="radio" data-level="hard">Hard</button></div>
+  <button type="button" class="quiet" id="newRound"><i data-icon="refresh"></i>New plant</button></div>
+  <p id="levelNote" class="small-note"></p>
+  <h3 class="sub">The spec</h3>
+  <div class="tickets" id="tickets"></div>
+  <p id="actuatorNote" class="actuator" hidden></p>
+  <h3 class="sub">Bench test · unit step, no controller</h3>
+  <div class="plot small" id="bench" aria-label="Noisy open-loop step response of the hidden plant"></div>
+  <p class="small-note">Dots are noisy readings, like a real bench. Trust the trend, not one dot.</p>
+</section>
+
+<section class="card predict-card"><h2><i data-icon="pencil"></i>Predict, then check</h2>
+  <p>Before your first test: one line of the spec can never pass with <b>P alone</b> (K<sub>i</sub> = K<sub>d</sub> = 0), whatever K<sub>p</sub> you choose. Which one?</p>
+  <form id="predictForm" class="predict-action-row"><div class="input-wrap"><label for="predictPick">Your prediction</label>
+    <select id="predictPick" required><option value="">Choose a line</option><option value="overshoot">Overshoot</option><option value="settle">Settling time</option><option value="error">Steady-state error</option></select></div>
+    <button>Check prediction</button></form>
+  <p id="predictResult" aria-live="polite"></p>
+</section>
+
+<section class="card tune" id="tune"><div class="card-header-flex"><h2><i data-icon="sliders"></i>Tune the loop</h2><span class="equation-pill">u = K<sub>p</sub>e + K<sub>i</sub>∫e dt + K<sub>d</sub>·de/dt</span></div>
+  <div class="controls">
+    <div class="control-group"><label for="kp">Proportional gain K<sub>p</sub> <output class="value" id="kpValue" for="kp"></output></label><input id="kp" type="range" min="0" max="5" step="0.01" value="1"></div>
+    <div class="control-group"><label for="ki">Integral gain K<sub>i</sub> <output class="value" id="kiValue" for="ki"></output></label><input id="ki" type="range" min="0" max="5" step="0.01" value="0"></div>
+    <div class="control-group"><label for="kd">Derivative gain K<sub>d</sub> <output class="value" id="kdValue" for="kd"></output></label><input id="kd" type="range" min="0" max="1" step="0.01" value="0"></div>
+  </div>
+  <div class="tune-actions">
+    <button type="button" id="runTest" class="big"><i data-icon="play"></i>Run test <span id="testCount" class="count"></span></button>
+    <label class="switch" id="awWrap" hidden><input type="checkbox" id="antiWindup" checked> Anti-windup</label>
+    <label class="switch"><input type="checkbox" id="live"> Live preview <small>(practice, no score)</small></label>
+    <button type="button" class="quiet" id="hintButton"><i data-icon="bulb"></i>Show a hint</button>
+    <button type="button" class="quiet" id="revealButton"><i data-icon="eye"></i>Reveal plant</button>
+  </div>
+  <ol id="hints" class="hints" aria-live="polite"></ol>
+</section>
+
+<section class="card result" id="result" hidden aria-live="polite"><div class="card-header-flex"><h2><i data-icon="chart"></i><span id="resultTitle">Test result</span></h2><span class="equation-pill" id="resultPill"></span></div>
+  <div class="result-grid">
+    <div>
+      <div class="plot" id="closedLoop" aria-label="Closed-loop step response with the spec drawn on it"></div>
+      <div class="key"><span class="k-y">Your loop</span><span class="k-old">Earlier tests</span><span class="k-r">Target</span><span class="k-bad">Overshoot ceiling</span><span class="k-good">±2% band after the deadline</span></div>
+      <details class="effort"><summary>Control signal u</summary><div class="plot small" id="effort" aria-label="Control signal of the last test"></div></details>
+    </div>
+    <aside class="score-panel" aria-label="Score">
+      <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" class="ring-bg"/><circle cx="60" cy="60" r="50" class="ring-fg" id="ringFg" pathLength="100" stroke-dasharray="0 100"/></svg>
+      <div class="ring-text"><b id="scoreValue">–</b><span>score</span></div>
+      <p class="stars" id="stars" aria-label="Stars"></p>
+      <ul class="breakdown" id="breakdown"></ul>
+    </aside>
+  </div>
+  <p id="resultVerdict" class="readout" hidden></p>
+</section>
+
+<section class="card" id="reveal" hidden aria-live="polite"><h2><i data-icon="check"></i>The hidden plant</h2>
+  <div class="reveal-grid"><div class="metrics" id="truth"></div></div>
+  <h3>One way to solve it</h3>
+  <ol id="solution"></ol>
+  <div class="actions"><button type="button" class="quiet" id="tryReference"><i data-icon="play"></i>Load these gains</button><button type="button" id="nextRound"><i data-icon="refresh"></i>Next plant</button></div>
+</section>
+
+
+<section class="card scoreboard" aria-label="Session score"><div class="card-header-flex"><h2><i data-icon="trophy"></i>Session score</h2><span class="equation-pill" id="rank">Tuner in training</span></div>
+  <div class="metrics" id="session"></div>
+  <p class="small-note">A round counts when you move on to a new plant after at least one scored test. Its score is your best test.</p>
+</section>
+
+</main><footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>P4 · Ahmad AlSheikh</footer></body></html>

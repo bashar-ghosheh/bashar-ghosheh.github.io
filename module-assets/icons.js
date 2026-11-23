@@ -35,7 +35,8 @@ const ICONS = {
   motor: '<circle cx="10" cy="12" r="6"/><circle cx="10" cy="12" r="2"/><path d="M16 12h6M4 6l2 2M4 18l2-2"/>',
   flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
-  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'
+  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
 };
 function icon(name) {
   return '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[name] + '</svg>';

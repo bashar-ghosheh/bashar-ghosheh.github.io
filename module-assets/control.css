@@ -51,7 +51,15 @@
 .stepper button[aria-pressed=true]{border-color:var(--output);background:var(--surface)}
 .stepper button[aria-pressed=true] span{background:var(--output);border-color:var(--output);color:var(--surface)}
 .story{min-height:3.2em;background:var(--subtle);border-radius:8px;padding:10px 14px;margin:6px 0 4px}
-.metrics .metric-item.good-m{outline:2px solid var(--pass)}.metrics .metric-item.bad-m{outline:2px solid var(--fail)}
+.control-hub #demo .controls{gap:22px 26px;margin:18px 0 22px}
+.control-hub #demo .plot{margin-top:6px}
+.control-hub .metrics{gap:14px;margin:22px 0 14px}
+.control-hub .metrics .metric-item{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border:2px solid transparent;border-radius:10px}
+.control-hub .metrics .metric-item strong{margin:0;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.metrics .metric-item.good-m{border-color:var(--pass)}.metrics .metric-item.bad-m{border-color:var(--fail)}
+/* shared.js puts a range hint under the slider and again under the exact field: keep one */
+.control-hub input[type=range] + .field-range{display:none}
+.control-hub .parameter-entry{margin-top:10px}
 .small-note{color:var(--muted);font-size:.85rem;margin-bottom:0}
 code{font:.88em ui-monospace,monospace;background:var(--subtle);padding:1px 5px;border-radius:4px}
 pre code{display:block;padding:10px 12px;overflow-x:auto;white-space:pre;background:var(--subtle)}

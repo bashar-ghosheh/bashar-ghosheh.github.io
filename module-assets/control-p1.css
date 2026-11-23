@@ -1,0 +1,10 @@
+/* P1 · PID playground. Builds on styles.css and control.css. */
+.p1 h3.group{display:flex;align-items:center;gap:10px;margin:22px 0 4px;font-size:.95rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--edge);padding-top:16px}
+.p1 h3.group:first-of-type{border-top:0;padding-top:4px;margin-top:6px}
+.p1 h3.group span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--output);color:var(--surface);font:600 .82rem ui-monospace,monospace;letter-spacing:0}
+.p1 #playground .controls{margin:10px 0 6px}
+.compare-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:6px 0 4px}
+.compare-actions button{gap:6px}
+.p1 table.compare{font-variant-numeric:tabular-nums;margin-top:8px}
+.p1 table.compare tr.live{background:var(--subtle);font-weight:650}
+.p1 table.compare small{font-weight:400;color:var(--muted)}

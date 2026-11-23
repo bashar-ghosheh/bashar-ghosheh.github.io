@@ -118,9 +118,9 @@ Opened from the banner on the hub, or directly at `control.html`. Every module k
 | Member | Module | Page | Status |
 | :--- | :--- | :--- | :--- |
 | **Bashar Ghosheh** | P1: PID playground | [P1](control-p1.html) | Completed |
-| **Amro Qutna** | P2: A slow sensor in the loop, and My system | [P2](control-p2.html), `control-system.html` | P2 complete, My system in progress |
+| **Amro Qutna** | P2: A slow sensor in the loop, and My system | [P2](control-p2.html), [My system](control-system.html) | Completed |
 | **Tareq Ahmad** | P3: Digital PID and the Arduino code generator | [P3](control-p3.html) | Completed |
-| **Ahmad AlSheikh** | P4: Tuning challenge, Control hub, shared simulator, integration | `control-p4.html`, `control.html`, `pid-core.js` | Hub and simulator done, P4 in progress |
+| **Ahmad AlSheikh** | P4: Tuning challenge, Control hub, shared simulator, integration | [P4](control-p4.html), `control.html`, `pid-core.js` | Completed |
 
 ## Control hub (`control.html`)
 
@@ -137,6 +137,7 @@ Open [the P1 playground](control-p1.html) from the Control hub. Choose a first-o
 
 - Plots live closed-loop output $y$ against setpoint $r$ alongside the clipped control signal $u$ and its saturation rate.
 - Reports live 10–90% rise time, overshoot, ±2% settling time and steady-state error.
+- **Keep this run** stores up to three earlier runs: they are drawn dashed under the live curve and listed in a table with their gains and metrics, so changing one gain shows the lecture's P, I, D table directly.
 - Includes three **Predict, then check** experiments (P-only, PI, and saturated PI) and the three Homework 2 validation checks.
 
 ## P2 · A slow sensor in the loop
@@ -144,6 +145,7 @@ Open [the P1 playground](control-p1.html) from the Control hub. Choose a first-o
 Open [the P2 experiment](control-p2.html) from the Control hub. Adjust the sensor time constant and PID gains to compare true wheel speed with the reading used by the controller. The default settings use a unit step and a normalized first-order motor.
 
 - Choose the 0.25 s sensor preset with the reference gains. At the first target crossing, the sensor reads about 0.645. Increase the lag to 1.5 s to see successive peaks grow.
+- **Overshoot against sensor lag:** for the current gains, 41 simulations sweep τs from 0 to 2 s and plot the peak overshoot. A dashed line marks the Routh boundary τs* = (1 + Kd)(1 + Kp)/(Ki − 1 − Kp), past which the swings grow.
 - Select **Run P2 checks** to compare all four presets against their expected behavior.
 - Open **Pole placement** to apply state feedback to the Module 3 mass-spring-damper. The page compares the selected poles with the calculated eigenvalues and plots the return to rest.
 
@@ -151,9 +153,35 @@ Open [the P2 experiment](control-p2.html) from the Control hub. Adjust the senso
 
 Open [the digital PID experiment](control-p3.html) from the Control hub. Compare the 10 ms and 350 ms presets to see how the zero-order hold affects the output and PWM command. The sampling table keeps the other settings fixed and reports the measured response for several periods.
 
+- **Verify P3** runs five checks: Ts = 1 ms equals the continuous PID, u changes only at sample instants, the response worsens as Ts grows (350 ms does not settle), anti-windup lowers the peak and the settling time, and the sketch carries the settings and the u[k] formula.
 - **Windup demo** applies a tight actuator limit and compares the same controller with conditional integration on and off.
 - **Arduino sketch** generates an Arduino Uno sketch from the active settings. For the micromouse, supply the measured plant values and replace the example analog input with calibrated encoder speed.
 - To reuse the generator from My system, load `arduino-pid.js` and call `generateArduinoPID({ Kp, Ki, Kd, TsMs, r, uMax, antiWindup })`. The returned sketch maps commands in the range 0 to `uMax` to 8-bit PWM.
+
+## P4 · Tuning challenge (`control-p4.html`)
+
+A hidden random plant, a spec, and three gains.
+
+- **The plant** is a Module 4 "Guess the sensor" plant (`newSensor()` in `sensor-game.js`): first order with random K and τ, or second order with random ζ and ωn. The page shows only its noisy open-loop step test, so the user first reads the plant, as in Module 4.
+- **Three levels.** Easy: first order, overshoot ≤ 15%. Normal: first or second order, overshoot ≤ 10%. Hard: lightly damped second order, overshoot ≤ 5%, and an actuator that saturates (u between 0 and 3), with an anti-windup switch.
+- **The spec** has three lines, each marked PASS or FAIL after every test: overshoot above the target, 2% settling time (about half, or on Easy 80%, of the time the plant takes on its own), and steady-state error within 1%.
+- **Every round is solvable.** Before a plant is shown, `findReference()` designs gains by pole placement and checks them on the true plant. The sliders are wide enough to reach them.
+- **Score:** overshoot 35, settling 35, error 30. Three tests are free, then each test costs 5% (never below half). Three stars for a full pass within three tests. A session board keeps rounds, average, best and three-star rounds.
+- **Results:** the closed-loop curve with the spec drawn on it (overshoot ceiling, settling deadline, ±2% band), earlier tests in grey, the control signal, and one sentence per failed line saying which gain to change.
+- **Live preview** makes the curve follow the sliders for practice, with no score. **Hints** step from reading the plant to a design shortcut. **Reveal** shows the true plant and the reference design with its working.
+- "Predict, then check": which spec line can P alone never pass?
+
+## My system · Our micromouse drive motor (`control-system.html`)
+
+Section 3 of the sheet, applied to our micromouse. The robot is not assembled yet, so the plant comes from the motor's datasheet, which the sheet allows, with the source cited on the page.
+
+1. **The plant and its source.** The motor we ordered is the BRINGSMART JGA12-N20 encoder gear motor, 6 V, 530 rpm ([AliExpress item 32968556654](https://www.aliexpress.com/item/32968556654.html)). From the seller's manual (row JGA12-N20-30: no-load 40 mA, stall 0.55 A and 0.4 kg·cm, ratio 30) the page derives R = V/I_stall, Ke, Kt, the inertia of half the robot at the motor shaft, and τ = J·R/(Kt·Ke) ≈ 27 ms. K = 530 rpm / 100% PWM = 5.3 rpm per %. Robot mass (120 g), wheel diameter (32 mm) and rotor inertia are stated assumptions, editable on the page.
+2. **The spec and why.** 0.6 ≤ ζ ≤ 0.8 (wheel slip and odometry errors otherwise), PWM inside 0–100% (no clipping or wind-up), zero steady-state error (both wheels at the same speed, so the mouse drives straight), cruising at 300 rpm ≈ 0.5 m/s.
+3. **Design.** `designPI()` turns the chosen ζ and ωn into Kp and Ki; a digital PID (Ts = 5 ms) with the real PWM limits and anti-windup is simulated, and each line of the spec is marked PASS or FAIL. Default: ζ = 0.7, ωn = 45 rad/s, Kp = 0.1206, Ki = 9.99, 5.8% overshoot, 113 ms settling, PWM peak 70%.
+4. **Arduino code** from P3's `generateArduinoPID()`, with a copy button.
+5. **Measure it yourself.** When the robot is built, paste a logged PWM step test (`time_ms, rpm`): the page finds K from the final speed and τ from the 63.2% point, compares them with the datasheet model, and redesigns the loop.
+
+"Predict, then check": a heavier battery doubles the mass; with the same gains, what happens to the overshoot?
 
 ## Shared simulator (`pid-core.js`)
 
@@ -210,6 +238,8 @@ For the plant $K/(\tau s+1)$ with $K = 1$, $\tau = 1$ s:
 | `control.html`, `control.js` | PID Control hub: block diagram, live demo, validation board |
 | `control-p1.html` … `control-p4.html`, `control-system.html` | The PID modules and the applied design (being added) |
 | `pid-core.js` | Shared closed-loop simulator (RK4), metrics and PID theory |
+| `control-p4.html`, `control-p4.js`, `tuning-challenge.js`, `module-assets/control-p4.css` | P4 page, its game maths (plants, spec, judging, score, reference design) and styles |
+| `control-system.html`, `control-system.js`, `motor-model.js`, `module-assets/control-system.css` | My system page, the motor model from the datasheet, the design checks and the step-test fit |
 | `module-assets/control.css` | Extra styles for the Control section |
 | `HW2-TEAM-PLAN.md` | Team plan for Homework 2 |
 
@@ -221,7 +251,7 @@ For the plant $K/(\tau s+1)$ with $K = 1$, $\tau = 1$ s:
 Run the numerical tests from the repository root (Node 18 or newer):
 
 ```sh
-node --test frequency.test.js second-order.test.js sensor-game.test.js notes-check.test.js pid-core.test.js
+node --test frequency.test.js second-order.test.js sensor-game.test.js notes-check.test.js pid-core.test.js tuning-challenge.test.js arduino-pid.test.js motor-model.test.js
 ```
 
 `pid-core.test.js` checks the simulator against the three PID validation checks, closed-form closed-loop responses, the Module 3 second-order formula, the Routh limit for a slow sensor, saturation, anti-windup and the effect of the sampling time.
@@ -238,7 +268,7 @@ In accordance with the course guidelines (Section 8):
 - **Module 2:** Codex assisted with implementation, packaging and verification. Amro Qutna is responsible for reviewing and explaining the module's code and equations.
 - **Module 3:** Codex assisted with implementation, packaging, numerical verification and repository integration. Tareq Ahmad is responsible for reviewing and explaining the module's code and equations.
 - **Module 4, hub and integration:** Claude assisted with the implementation of Module 4 and the hub page, moving Module 1 to the shared theme, browser testing and this README. Ahmad AlSheikh is responsible for reviewing and explaining the module's code and equations.
-- **PID Control hub and `pid-core.js` (Homework 2):** Claude assisted with the shared simulator and its tests, the Control hub page and this README. Ahmad AlSheikh is responsible for reviewing and explaining this code and its equations.
+- **PID Control hub, `pid-core.js` and P4 (Homework 2):** Claude assisted with the shared simulator and its tests, the Control hub page, the P4 tuning challenge and its tests, the shared header, run comparison, sweep chart and P3 checks added to P1–P3, the My system page and its motor model, and this README. Ahmad AlSheikh is responsible for reviewing and explaining this code and its equations.
 - **P1 (Homework 2):** AI tools assisted with implementation review, bug fixes and verification of the PID playground page. Bashar Ghosheh is responsible for reviewing and explaining the module's code and equations.
 - **P2 (Homework 2):** AI assistance covered implementation and verification of the sensor and pole-placement experiments.
 - **P3 (Homework 2):** Codex assisted with the interactive sampling and anti-windup experiments, the Arduino sketch generator, and numerical and browser verification. Tareq Ahmad is responsible for explaining the module's code and equations.

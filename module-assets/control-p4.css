@@ -1,0 +1,79 @@
+/* P4 · Tuning challenge. Builds on styles.css and control.css. */
+.p4 .how{padding-left:1.3em}.p4 .how li{margin:.45em 0}
+.p4 h3.sub{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+
+/* mission header: title, level switch, new plant */
+.mission .case{align-items:center;gap:12px}
+.mission .case h2{margin-right:auto}
+.level{display:inline-flex;background:var(--subtle);border-radius:10px;padding:3px;gap:2px}
+.level button{background:transparent;color:var(--muted);min-height:36px;padding:4px 14px;border-radius:8px;font-size:.92rem}
+.level button[aria-checked=true]{background:var(--surface);color:var(--text);box-shadow:0 1px 4px #0002}
+
+/* spec tickets */
+.tickets{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.ticket{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:4px 12px;align-items:center;border:1.5px solid var(--edge);border-radius:12px;padding:12px 14px;background:var(--surface);position:relative;transition:border-color .25s,background .25s}
+.ticket::after{content:"";position:absolute;inset:0 auto 0 0;width:5px;border-radius:12px 0 0 12px;background:var(--edge);transition:background .25s}
+.ticket-icon{grid-row:span 2;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--subtle);color:var(--output)}
+.ticket-label{font-weight:650;line-height:1.25}.ticket-label small{display:block;font-weight:400;color:var(--muted);font-size:.8rem;margin-top:2px}
+.ticket-limit{font:700 1.15rem ui-monospace,monospace;color:var(--text);white-space:nowrap}
+.ticket-result{grid-column:2/-1;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--edge);padding-top:6px;margin-top:2px;font-size:.88rem;color:var(--muted)}
+.ticket-result em{font:normal 700 .78rem ui-monospace,monospace;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
+.ticket.pass{border-color:var(--pass);background:color-mix(in srgb,var(--pass) 6%,var(--surface))}.ticket.pass::after{background:var(--pass)}
+.ticket.pass .ticket-result em{background:var(--pass);color:var(--surface)}.ticket.pass .ticket-result span{color:var(--pass);font-weight:650}
+.ticket.fail{border-color:var(--fail);background:color-mix(in srgb,var(--fail) 5%,var(--surface))}.ticket.fail::after{background:var(--fail)}
+.ticket.fail .ticket-result em{background:var(--fail);color:var(--surface)}.ticket.fail .ticket-result span{color:var(--fail);font-weight:650}
+.ticket.pass,.ticket.fail{animation:pop .3s}
+.actuator{display:flex;align-items:center;gap:8px;background:color-mix(in srgb,var(--target) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--target) 45%,var(--surface));border-radius:10px;padding:9px 12px;margin:12px 0 0;font-size:.92rem}
+.actuator .icon{color:var(--target);flex:none}
+
+/* tuning */
+.p4 .tune .controls{gap:22px 26px;margin:18px 0 20px}
+.tune-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;border-top:1px solid var(--edge);padding-top:16px}
+.tune-actions .big{min-height:50px;padding:8px 22px;font-size:1.05rem;gap:6px;box-shadow:0 6px 16px -10px var(--button)}
+.tune-actions .big .count{font:600 .8rem ui-monospace,monospace;opacity:.75}
+.switch{display:inline-flex;align-items:center;gap:7px;font-weight:600;cursor:pointer;background:var(--subtle);border-radius:8px;padding:6px 11px;min-height:44px}
+.switch small{font-weight:400;color:var(--muted)}
+.switch input{width:18px;height:18px;min-height:0;accent-color:var(--output)}
+.hints{margin:14px 0 0;padding-left:1.3em}.hints:empty{display:none}.hints li{background:var(--subtle);border-radius:8px;padding:8px 12px;margin:6px 0;animation:pop .3s}
+
+/* result */
+.result-grid{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:20px;align-items:start}
+.result .plot{height:340px}
+.result .key{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.78rem;color:var(--muted);margin:4px 0 8px}
+.result .key span::before{content:"";display:inline-block;width:20px;height:0;border-top:3px solid var(--output);vertical-align:middle;margin-right:6px}
+.result .key .k-old::before{border-top:2px solid var(--muted);opacity:.5}
+.result .key .k-r::before{border-top:2px dashed var(--input)}
+.result .key .k-bad::before{border-top:2px dashed var(--fail)}
+.result .key .k-good::before{height:8px;border:0;background:var(--pass);opacity:.35;vertical-align:-1px}
+.effort{margin:6px 0 0!important;padding:10px 14px!important}
+.score-panel{position:relative;border:1px solid var(--edge);border-radius:14px;padding:16px;text-align:center;background:linear-gradient(180deg,var(--subtle),var(--surface))}
+.ring{width:150px;height:150px;transform:rotate(-90deg);display:block;margin:0 auto}
+.ring circle{fill:none;stroke-width:10}
+.ring-bg{stroke:var(--edge);opacity:.5}
+.ring-fg{stroke:var(--output);stroke-linecap:round;transition:stroke-dasharray .8s cubic-bezier(.2,.8,.2,1)}
+.ring-fg.full{stroke:var(--pass)}
+.ring-text{position:absolute;top:16px;left:0;right:0;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.ring-text b{font:600 2.6rem/1 Georgia,serif;font-variant-numeric:tabular-nums}
+.ring-text span{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stars{font-size:1.5rem;letter-spacing:.15em;color:var(--target);margin:6px 0 8px;min-height:1.6em}
+.stars.practice{font-size:.95rem;letter-spacing:0;color:var(--muted);font-weight:600}
+.breakdown{list-style:none;padding:0;margin:0;text-align:left;font-size:.88rem}
+.breakdown li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--edge)}
+.breakdown li.pass b{color:var(--pass)}.breakdown li.fail b{color:var(--fail)}
+
+/* reveal and session */
+.p4 #reveal .metrics,.p4 .scoreboard .metrics{gap:12px;margin:10px 0 6px}
+.p4 #reveal .metric-item,.p4 .scoreboard .metric-item{display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:10px}
+.p4 #reveal .metric-item strong,.p4 .scoreboard .metric-item strong{margin:0;font-size:1.15rem}
+.p4 #solution li{margin:.5em 0}
+.p4 #reveal .actions{margin-top:12px}
+
+@media(max-width:760px){
+  .result-grid{grid-template-columns:1fr}
+  .score-panel{display:grid;grid-template-columns:120px 1fr;gap:4px 14px;text-align:left;align-items:center}
+  .ring{width:120px;height:120px;grid-row:span 2}
+  .ring-text{top:16px;left:16px;right:auto;width:120px;height:120px}
+  .ring-text b{font-size:2rem}
+  .breakdown{grid-column:1/-1}
+  .mission .case h2{width:100%}
+}

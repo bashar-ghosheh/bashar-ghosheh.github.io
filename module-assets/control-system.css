@@ -1,0 +1,26 @@
+/* My system page. Builds on styles.css, control.css and control-p4.css (tickets). */
+.mysys .page-links{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px}
+.mysys .page-links a{color:#095c50;font-weight:600;padding:6px 0}
+.mysys .note{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--target) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--target) 40%,var(--surface));border-radius:10px;padding:10px 14px;margin:10px 0 16px}
+.mysys .note .icon{color:var(--target);flex:none;margin-top:3px}.mysys .note p{margin:0}
+.source-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px}
+.source-grid h3,.mysys #plant>h3{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 0 8px}
+.source-grid table{font-variant-numeric:tabular-nums}
+.assume{display:grid;gap:10px}.assume label{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--subtle);border-radius:8px;padding:6px 10px}
+.assume input{width:7em}.assume .field-range{display:none}
+.derive{padding-left:1.3em}.derive li{margin:.45em 0}
+.result-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px}
+.result-chips div{border:1.5px solid var(--output);border-radius:12px;padding:10px 14px;background:color-mix(in srgb,var(--output) 6%,var(--surface))}
+.result-chips span{display:block;font-size:.8rem;color:var(--muted)}.result-chips b{font:600 1.4rem Georgia,serif}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.why{border:1px solid var(--edge);border-radius:12px;padding:12px 14px;border-left:5px solid var(--output)}
+.why b{font:700 1.05rem ui-monospace,monospace}.why p{margin:.4em 0 0;font-size:.94rem}
+.mysys #design .controls{gap:22px 26px;margin:16px 0 18px}
+.gains{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 14px}
+.gains .metric-item{flex:1 1 140px;display:flex;flex-direction:column;gap:3px;padding:10px 14px;border-radius:10px}
+.gains .metric-item strong{margin:0;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.mysys .tickets{margin-bottom:12px}.mysys .ticket-limit:empty{display:none}
+.mysys #code textarea,.mysys #logText{display:block;width:100%;resize:vertical;border:1px solid var(--edge);border-radius:8px;padding:12px;background:var(--subtle);color:var(--text);font:.86rem/1.5 ui-monospace,Consolas,monospace}
+.measure-row{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;align-items:start}
+.measure-side{display:grid;gap:10px}.measure-side label{display:grid;gap:4px}.measure-side .field-range{display:none}
+@media(max-width:760px){.source-grid,.measure-row{grid-template-columns:1fr}}

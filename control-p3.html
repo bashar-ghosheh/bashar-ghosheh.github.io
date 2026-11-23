@@ -22,27 +22,33 @@
     <nav aria-label="Toolkit navigation">
       <a href="index.html"><i data-icon="home"></i>Hub</a>
       <a href="control.html"><i data-icon="loop"></i>Control</a>
-      <a href="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a>
-      <a href="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
+      <a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a>
+      <a href="control.html#modules" data-module-page="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
       <a href="control-p3.html" aria-current="page" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a>
-      <a href="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
-      <a href="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
+      <a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
+      <a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
     </nav>
     <button id="theme" type="button">Theme</button>
   </div>
 </header>
 <main>
-  <header class="hero p3-intro">
-    <p class="eyebrow">ENCS4380 / CONTROL / P3</p>
-    <h1>Digital PID</h1>
-    <p>Watch the controller sample the error, update the PWM command, and hold it until the next sample. Try a slower sample rate or a tight actuator limit to see how each changes the response.</p>
+  <section class="hero p3-intro"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · PID CONTROL · P3</p><h1>Digital PID</h1><p class="credit">Tareq Ahmad · Dr. Wasel Ghanem</p>
+    <p class="lead">Watch the controller sample the error, update the PWM command, and hold it until the next sample. Try a slower sample rate or a tight actuator limit to see how each changes the response.</p>
     <nav aria-label="On this page">
       <a href="#experiment">Experiment</a>
       <a href="#comparison">Compare results</a>
+      <a href="#verify">Verify P3</a>
       <a href="#predict">Predict, then check</a>
       <a href="#arduino">Arduino code</a>
-    </nav>
-  </header>
+    </nav></div>
+    <div class="hero-art always"><svg class="curve" viewBox="0 0 360 215" role="img" aria-label="A smooth plant output following a stair-step control command that changes only at sample instants">
+      <path d="M30 20v170h315" fill="none" stroke="#153631" stroke-width="1.5"/>
+      <path d="M30 60h315" stroke="#15599b" stroke-width="2" stroke-dasharray="6 5"/>
+      <path class="draw" pathLength="1" d="M30 40h35v55h35v35h35v20h35v8h35v4h35v2h35v1h70" fill="none" stroke="#985014" stroke-width="2.5"/>
+      <g class="late" fill="#985014"><circle cx="30" cy="40" r="3.5"/><circle cx="65" cy="95" r="3.5"/><circle cx="100" cy="130" r="3.5"/><circle cx="135" cy="150" r="3.5"/><circle cx="170" cy="158" r="3.5"/><circle cx="205" cy="162" r="3.5"/><circle cx="240" cy="164" r="3.5"/><circle cx="275" cy="165" r="3.5"/></g>
+      <path class="draw d2" pathLength="1" d="M30 190C70 120 110 75 160 64S260 60 345 60" fill="none" stroke="#00705f" stroke-width="3.5" stroke-linecap="round"/>
+      <g class="late"><text x="214" y="50" font-size="13" fill="#15599b">target</text><text x="214" y="88" font-size="13" font-weight="600" fill="#00705f">output y</text><text x="172" y="182" font-size="13" font-weight="600" fill="#985014">held command u[k]</text><text x="60" y="207" font-size="12" fill="#153631">one sample Tₛ</text><path d="M65 196h35" stroke="#153631" stroke-width="1.5"/></g>
+    </svg></div></section>
 
   <section class="p3-bench" id="experiment" aria-label="Digital PID experiment">
     <aside class="card p3-settings" aria-labelledby="settings">
@@ -115,6 +121,14 @@
     </div>
   </section>
 
+  <section id="verify" class="card" aria-labelledby="verifyTitle">
+    <h2 id="verifyTitle"><i data-icon="checklist"></i>Verify P3</h2>
+    <p>Four checks on the shared simulator with the reference plant 1/(s + 1) and K<sub>p</sub> = K<sub>i</sub> = 5, plus one on the generated sketch. Your current experiment stays on screen.</p>
+    <button id="runChecks" type="button">Run P3 checks</button>
+    <p id="checkCount" role="status"></p>
+    <div id="p3Checks" class="validation"></div>
+  </section>
+
   <section id="predict" class="card" aria-labelledby="predictTitle">
     <h2 id="predictTitle">Predict, then check</h2>
     <div class="p3-questions">
@@ -160,6 +174,6 @@
     <p>Anti-windup skips adding an error when the raw command is beyond a limit and the error pushes it farther into that limit. An error that drives the command back toward range can still update the sum.</p>
   </details>
 </main>
-<footer>Birzeit University · ENCS4380 Interfacing Techniques · Tareq Ahmad</footer>
+<footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>P3 · Tareq Ahmad</footer>
 </body>
 </html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My system · Micromouse drive motor · ENCS4380</title>
+<script src="module-assets/theme.js"></script><link rel="stylesheet" href="module-assets/styles.css"><link rel="stylesheet" href="module-assets/control.css"><link rel="stylesheet" href="module-assets/control-p4.css"><link rel="stylesheet" href="module-assets/control-system.css">
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script defer src="module-assets/icons.js"></script>
+<script defer src="module-assets/shared.js"></script>
+<script defer src="pid-core.js"></script>
+<script defer src="arduino-pid.js"></script>
+<script defer src="motor-model.js"></script>
+<script defer src="control-system.js"></script></head>
+<body class="control-hub p4 mysys"><header class="top"><div class="bar"><nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html"><i data-icon="loop"></i>Control</a><a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control.html#modules" data-module-page="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control-system.html" aria-current="page" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav><button id="theme">Theme</button></div></header><main>
+
+<section class="hero"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · PID CONTROL · MY SYSTEM</p><h1>Our micromouse drive motor</h1><p class="credit">Bashar Ghosheh · Amro Qutna · Tareq Ahmad · Ahmad AlSheikh · Dr. Wasel Ghanem</p><p class="lead">A micromouse wins by holding the speed it is told, on both wheels, without slipping. Here we model the N20 gear motor we ordered, choose a spec for its speed loop, design a PI controller, and generate the Arduino code.</p>
+  <nav class="page-links" aria-label="On this page"><a href="#plant">1 · Plant</a><a href="#spec">2 · Spec</a><a href="#design">3 · Design</a><a href="#code">4 · Code</a><a href="#measure">5 · Measure it</a></nav></div>
+  <div class="hero-art always"><svg class="curve" viewBox="0 0 360 215" role="img" aria-label="Encoder speed of the wheel rising to the target speed with a small overshoot, under a PWM command that stays below 100 percent">
+    <path d="M30 20v170h315" fill="none" stroke="#153631" stroke-width="1.5"/>
+    <path d="M30 34h315" stroke="#a72d32" stroke-width="1.5" stroke-dasharray="4 4"/><text x="250" y="29" font-size="12" fill="#a72d32">PWM 100%</text>
+    <path class="draw" pathLength="1" d="M30 70h12v14h14v16h14v10h14v6h14v4h14v2h220" fill="none" stroke="#985014" stroke-width="2.2"/>
+    <path d="M30 80h315" stroke="#15599b" stroke-width="2" stroke-dasharray="6 5"/>
+    <path class="draw d2" pathLength="1" d="M30 190C55 120 75 82 100 76S140 80 170 80 260 80 345 80" fill="none" stroke="#00705f" stroke-width="3.5" stroke-linecap="round"/>
+    <g class="late" font-size="12"><text x="200" y="74" fill="#15599b">target speed</text><text x="200" y="100" fill="#00705f" font-weight="600">wheel speed (encoder)</text><text x="200" y="134" fill="#985014" font-weight="600">PWM command</text></g>
+  </svg></div></section>
+
+<section class="card" id="plant"><div class="card-header-flex"><h2><i data-icon="motor"></i>1 · The plant and where its numbers come from</h2><span class="equation-pill">τ·y′ + y = K·u</span></div>
+  <p>The plant is one drive wheel: input <b>u</b> = PWM duty (%), output <b>y</b> = wheel speed from the encoder (rpm). A DC gear motor driving the robot's inertia is first order, like the sensors of Module 1.</p>
+  <div class="note"><i data-icon="bulb"></i><p>Our robot is still being built, so these numbers come from the <b>motor's datasheet</b>, as the sheet allows. When the robot is assembled, section 5 replaces them with a measured step test.</p></div>
+  <div class="source-grid">
+    <div><h3>From the datasheet</h3>
+      <div class="table-scroll"><table><tbody id="dsRows"></tbody></table></div>
+      <p class="small-note">Sources: <a href="https://www.aliexpress.com/item/32968556654.html" target="_blank" rel="noopener">BRINGSMART JGA12-N20 encoder motor, AliExpress item 32968556654</a> (the 6 V 530 rpm option we ordered) and the seller's product manual, table row JGA12-N20-30 (6 V, ratio 30).</p></div>
+    <div><h3>Our robot (assumed)</h3>
+      <div class="assume" id="assumptions">
+        <label for="massGrams">Robot mass (g)<input id="massGrams" type="number" min="40" max="400" step="5" value="120"></label>
+        <label for="wheelMm">Wheel diameter (mm)<input id="wheelMm" type="number" min="15" max="60" step="1" value="32"></label>
+        <label for="rotorGcm2">Rotor inertia (g·cm²)<input id="rotorGcm2" type="number" min="0" max="1" step="0.005" value="0.025"></label>
+      </div>
+      <p class="small-note">Two wheels share the mass. Change any value and everything below updates.</p></div>
+  </div>
+  <h3>From the datasheet to K and τ</h3>
+  <ol class="derive" id="derive"></ol>
+  <div class="result-chips"><div><span>Gain K</span><b id="chipK"></b></div><div><span>Time constant τ</span><b id="chipTau"></b></div><div><span>Source</span><b id="chipSource">Datasheet</b></div></div>
+</section>
+
+<section class="card" id="spec"><h2><i data-icon="target"></i>2 · The spec and why it matters for a micromouse</h2>
+  <div class="why-grid">
+    <div class="why"><b>0.6 ≤ ζ ≤ 0.8</b><p>The practical range from the lecture. Less damping overshoots the speed: the wheels slip, the encoder count no longer matches the distance, and the mouse loses track of where it is in the maze.</p></div>
+    <div class="why"><b>PWM inside 0–100%</b><p>The driver cannot give more than the battery. If the PID asks for more, the command clips, the response no longer matches the design, and the integral winds up.</p></div>
+    <div class="why"><b>Zero steady-state error</b><p>Two motors are never identical. With P alone each wheel settles at a different speed and the mouse curves into a wall. The integral term makes both wheels reach the same speed.</p></div>
+    <div class="why"><b>Cruise at <span id="cruiseText">300 rpm</span></b><p>The step we design for: about <span id="cruiseMs">0.5 m/s</span> with our wheels, a sensible exploring speed for a 18 cm maze cell.</p></div>
+  </div>
+</section>
+
+<section class="card" id="design"><div class="card-header-flex"><h2><i data-icon="sliders"></i>3 · Design: the gains and the simulated response</h2><span class="equation-pill">Ki = ωn²τ/K · Kp = (2ζωnτ − 1)/K</span></div>
+  <p>Pick the damping ζ and the speed ωn of the closed loop. The PI gains follow directly (the same design as <a href="control-p4.html">P4</a>'s reference), and the loop is simulated as a digital PID with the real PWM limits and anti-windup.</p>
+  <div class="controls">
+    <div class="control-group"><label for="zeta">Damping ratio ζ <output class="value" id="zetaValue"></output></label><input id="zeta" type="range" min="0.4" max="1" step="0.01" value="0.7"></div>
+    <div class="control-group"><label for="wn">Natural frequency ω<sub>n</sub> (rad/s) <output class="value" id="wnValue"></output></label><input id="wn" type="range" min="10" max="120" step="1" value="45"></div>
+    <div class="control-group"><label for="rpm">Target speed (rpm) <output class="value" id="rpmValue"></output></label><input id="rpm" type="range" min="100" max="500" step="10" value="300"></div>
+    <div class="control-group"><label for="TsMs">Sampling period T<sub>s</sub> (ms) <output class="value" id="TsValue"></output></label><input id="TsMs" type="range" min="1" max="20" step="1" value="5"></div>
+  </div>
+  <div class="gains" id="gains"></div>
+  <div class="tickets" id="specTickets"></div>
+  <div class="plot" id="speedPlot" aria-label="Simulated wheel speed against the target speed"></div>
+  <div class="plot small" id="pwmPlot" aria-label="PWM command with the 0 and 100 percent limits"></div>
+  <p id="designVerdict" class="readout"></p>
+</section>
+
+<section class="card predict-card"><h2><i data-icon="pencil"></i>Predict, then check</h2>
+  <p>Later we add a heavier battery, so the robot's mass doubles. τ grows. If we keep <b>the same gains</b>, does the overshoot go up or down?</p>
+  <form id="predictForm" class="predict-action-row"><div class="input-wrap"><label for="predictPick">Your prediction</label>
+    <select id="predictPick" required><option value="">Choose one</option><option value="up">It goes up</option><option value="same">It stays the same</option><option value="down">It goes down</option></select></div><button>Check prediction</button></form>
+  <p id="predictResult" aria-live="polite"></p>
+</section>
+
+<section class="card" id="code"><div class="card-header-flex"><h2><i data-icon="code"></i>4 · The Arduino code</h2><button type="button" id="copyCode"><i data-icon="download"></i>Copy code</button></div>
+  <p>Generated by <a href="control-p3.html">P3</a>'s generator from the gains above: PWM in %, target in rpm, conditional anti-windup. On the robot, replace <code>readSensor()</code> with the encoder speed in rpm and set <code>PWM_PIN</code> to the motor driver's input.</p>
+  <textarea id="arduinoCode" readonly spellcheck="false" rows="20" wrap="off" aria-label="Generated Arduino sketch"></textarea>
+  <p id="copyStatus" class="small-note" role="status"></p>
+</section>
+
+<section class="card" id="measure"><h2><i data-icon="flask"></i>5 · Measure it yourself, when the robot is built</h2>
+  <ol class="how">
+    <li>Lift the robot so the wheel spins freely, or let it drive straight on the floor.</li>
+    <li>Apply a PWM step (for example 0 → 50%) and log <code>time_ms, rpm</code> from the encoder every 2–5 ms for about 0.3 s.</li>
+    <li>Paste the log below. The page finds K from the final speed and τ from the 63.2% point, then redesigns the loop with the measured plant.</li>
+  </ol>
+  <div class="measure-row">
+    <textarea id="logText" rows="8" placeholder="time_ms, rpm&#10;0, 0&#10;2, 18.5&#10;4, 36.0&#10;…"></textarea>
+    <div class="measure-side">
+      <label for="pwmStep">PWM step (%)<input id="pwmStep" type="number" min="1" max="100" step="1" value="50"></label>
+      <button type="button" id="fitLog"><i data-icon="check"></i>Find K and τ</button>
+      <button type="button" class="quiet" id="exampleLog"><i data-icon="refresh"></i>Load example log</button>
+      <button type="button" class="quiet" id="useDatasheet" disabled>Back to the datasheet</button>
+    </div>
+  </div>
+  <p id="fitResult" class="readout" hidden></p>
+  <div class="plot small" id="fitPlot" hidden aria-label="Logged speed against the fitted first-order model"></div>
+</section>
+
+</main><footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>My system · Bashar Ghosheh · Amro Qutna · Tareq Ahmad · Ahmad AlSheikh</footer></body></html>

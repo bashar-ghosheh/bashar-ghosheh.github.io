@@ -7,6 +7,7 @@
   <script src="module-assets/theme.js"></script>
   <link rel="stylesheet" href="module-assets/styles.css">
   <link rel="stylesheet" href="module-assets/control.css">
+  <link rel="stylesheet" href="module-assets/control-p1.css">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script defer src="module-assets/icons.js"></script>
   <script defer src="module-assets/graph-reader.js"></script>
@@ -14,16 +15,16 @@
   <script defer src="pid-core.js"></script>
   <script defer src="control-p1.js"></script>
 </head>
-<body class="control-hub">
+<body class="control-hub p1">
 <header class="top"><div class="bar">
   <nav aria-label="Toolkit navigation">
     <a href="index.html"><i data-icon="home"></i>Hub</a>
     <a href="control.html"><i data-icon="loop"></i>Control</a>
     <a href="control-p1.html" aria-current="page" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a>
-    <a href="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
-    <a href="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a>
-    <a href="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
-    <a href="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
+    <a href="control.html#modules" data-module-page="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
+    <a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a>
+    <a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
+    <a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
   </nav>
   <button id="theme">Theme</button>
 </div></header>
@@ -31,12 +32,18 @@
   <section class="hero">
     <div>
       <img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302">
-      <p class="eyebrow">ENCS4380 · CONTROL · P1</p>
+      <p class="eyebrow">ENCS4380 · PID CONTROL · P1</p>
       <h1>PID playground</h1>
       <p class="credit">Bashar Ghosheh · Dr. Wasel Ghanem</p>
       <p class="lead">How close can the output get to its target? Tune the controller and follow the effort it asks of the actuator.</p>
     </div>
-    <div class="hero-art" aria-hidden="true"><i data-icon="sliders"></i></div>
+    <div class="hero-art always"><svg class="curve" viewBox="0 0 360 215" role="img" aria-label="Closed-loop step responses of 1/(s+1) with P only: Kp = 1 stops at 50 percent, Kp = 3 at 75 percent, Kp = 9 at 90 percent and much faster">
+      <path d="M30 20v170h315" fill="none" stroke="#153631" stroke-width="1.5"/><path d="M30 50h315" stroke="#15599b" stroke-width="2" stroke-dasharray="6 5"/>
+      <polyline class="draw" pathLength="1" points="30.0,190.0 36.3,182.1 42.6,175.1 48.9,168.8 55.2,163.3 61.5,158.4 67.8,154.1 74.1,150.2 80.4,146.8 86.7,143.8 93.0,141.1 99.3,138.7 105.6,136.6 111.9,134.7 118.2,133.0 124.5,131.6 130.8,130.3 137.1,129.1 143.4,128.1 149.7,127.2 156.0,126.3 162.3,125.6 168.6,125.0 174.9,124.4 181.2,123.9 187.5,123.5 193.8,123.1 200.1,122.7 206.4,122.4 212.7,122.2 219.0,121.9 225.3,121.7 231.6,121.5 237.9,121.3 244.2,121.2 250.5,121.0 256.8,120.9 263.1,120.8 269.4,120.7 275.7,120.6 282.0,120.6 288.3,120.5 294.6,120.5 300.9,120.4 307.2,120.4 313.5,120.3 319.8,120.3 326.1,120.2 332.4,120.2 338.7,120.2 345.0,120.2" fill="none" stroke="#7d8f8b" stroke-width="2.5" stroke-linecap="round"/>
+      <polyline class="draw d2" pathLength="1" points="30.0,190.0 36.3,167.6 42.6,149.9 48.9,136.1 55.2,125.1 61.5,116.6 67.8,109.8 74.1,104.5 80.4,100.3 86.7,97.1 93.0,94.5 99.3,92.5 105.6,90.9 111.9,89.6 118.2,88.6 124.5,87.9 130.8,87.2 137.1,86.8 143.4,86.4 149.7,86.1 156.0,85.9 162.3,85.7 168.6,85.5 174.9,85.4 181.2,85.3 187.5,85.3 193.8,85.2 200.1,85.2 206.4,85.1 212.7,85.1 219.0,85.1 231.6,85.0 345.0,85.0" fill="none" stroke="#985014" stroke-width="2.5" stroke-linecap="round"/>
+      <polyline class="draw d3" pathLength="1" points="30.0,190.0 36.3,133.0 42.6,101.7 48.9,84.7 55.2,75.3 61.5,70.2 67.8,67.4 74.1,65.9 80.4,65.0 86.7,64.6 93.0,64.3 99.3,64.2 105.6,64.1 111.9,64.0 345.0,64.0" fill="none" stroke="#00705f" stroke-width="3.5" stroke-linecap="round"/>
+      <g class="late" font-size="13" font-weight="600"><text x="258" y="42" fill="#15599b" font-weight="400">target r</text><text x="248" y="79" fill="#00705f">K<tspan dy="3" font-size="9">p</tspan><tspan dy="-3"> = 9 · 90%</tspan></text><text x="248" y="101" fill="#985014">K<tspan dy="3" font-size="9">p</tspan><tspan dy="-3"> = 3 · 75%</tspan></text><text x="248" y="137" fill="#5f706c">K<tspan dy="3" font-size="9">p</tspan><tspan dy="-3"> = 1 · 50%</tspan></text><text x="330" y="208" fill="#153631" font-weight="400">3 s</text></g>
+    </svg></div>
   </section>
 
   <section class="card">
@@ -57,6 +64,7 @@
 
   <section class="card" id="playground">
     <h2><i data-icon="sliders"></i>Tune the controller</h2>
+    <h3 class="group"><span>1</span>Plant and step</h3>
     <div class="controls">
       <div><label for="plantType">Plant model</label><select id="plantType">
         <option value="first">First order · Module 1</option>
@@ -73,11 +81,13 @@
       <div id="zetaWrap" hidden><label for="plantZeta">Damping ratio ζ</label><input id="plantZeta" type="range" min="0.1" max="2" step="0.05" value="0.3"></div>
       <div id="wnWrap" hidden><label for="plantWn">Natural frequency ω<sub>n</sub> (rad/s)</label><input id="plantWn" type="range" min="0.5" max="10" step="0.1" value="2"></div>
     </div>
+    <h3 class="group"><span>2</span>Controller gains</h3>
     <div class="controls">
       <div><label for="Kp">Proportional gain K<sub>p</sub></label><input id="Kp" type="range" min="0" max="12" step="0.1" value="9"></div>
       <div><label for="Ki">Integral gain K<sub>i</sub></label><input id="Ki" type="range" min="0" max="10" step="0.1" value="0"></div>
       <div><label for="Kd">Derivative gain K<sub>d</sub></label><input id="Kd" type="range" min="0" max="0.8" step="0.05" value="0"></div>
     </div>
+    <h3 class="group"><span>3</span>Actuator limits</h3>
     <div class="controls">
       <div><label for="uMin">Lower actuator limit</label><input id="uMin" type="range" min="-100" max="0" step="0.1" value="-10"></div>
       <div><label for="uMax">Upper actuator limit</label><input id="uMax" type="range" min="0.1" max="100" step="0.1" value="10"></div>
@@ -89,6 +99,8 @@
       <span class="metric-item">Steady-state error<strong id="ess"></strong></span>
     </div>
     <p class="small-note" id="metricNote"></p>
+    <div class="compare-actions"><button type="button" id="keepRun"><i data-icon="lock"></i>Keep this run</button><button type="button" class="quiet" id="clearRuns">Clear kept runs</button><span class="small-note">Keep a run, change one gain, and compare: this is how to check the lecture table.</span></div>
+    <div class="table-scroll" id="compareWrap" hidden><table class="compare"><thead><tr><th>Run</th><th>K<sub>p</sub></th><th>K<sub>i</sub></th><th>K<sub>d</sub></th><th>Rise</th><th>Overshoot</th><th>Settling</th><th>Error</th></tr></thead><tbody id="compareRows"></tbody></table></div>
   </section>
 
   <section class="card">

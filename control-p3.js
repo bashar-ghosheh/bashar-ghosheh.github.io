@@ -185,6 +185,50 @@ el('windupQuestion').addEventListener('submit', (event) => {
     ' with it off. With anti-windup on, errors that deepen saturation do not accumulate.');
 });
 
+// [HW2 P3] "The effect of Ts is visible, anti-windup works, and the generated code
+// is correct." Each check runs the shared simulator (or the generator) and compares
+// the result with what the lesson predicts.
+el('runChecks').onclick = () => {
+  const base = { plant: firstOrder(1, 1), Kp: 5, Ki: 5, Kd: 0, uMin: 0, uMax: 6, antiWindup: true, T: 10 };
+  // 1. A digital PID sampled every 1 ms is the continuous PID of the hub.
+  const cont = simulate({ ...base, Ts: null });
+  const fine = simulate({ ...base, Ts: 0.001 });
+  const gap = Math.max(...cont.y.map((y, i) => Math.abs(y - fine.y[i])));
+  // 2. Zero-order hold: inside one 100 ms sample the command never changes.
+  const held = simulate({ ...base, Ts: 0.1, T: 3 });
+  const stride = Math.round(held.Ts / held.dt);
+  let changesInside = 0;
+  for (let i = 1; i < held.u.length; i++) if (i % stride !== 0 && held.u[i] !== held.u[i - 1]) changesInside++;
+  // 3. A slower controller overshoots more, until it breaks.
+  const peaks = [10, 200, 350].map((TsMs) => runP3({ ...p3Presets.fast, TsMs }).peakAboveTarget);
+  const slowSettled = runP3({ ...p3Presets.fast, TsMs: 350 }).metrics.settled;
+  // 4. Anti-windup after saturation: smaller peak and faster settling.
+  const on = runP3(p3Presets.windup),
+    off = runP3({ ...p3Presets.windup, antiWindup: false });
+  // 5. The sketch carries the current settings and the sheet's formula.
+  const settings = { Kp: 2.5, Ki: 1.25, Kd: 0.05, TsMs: 20, r: 1, uMax: 6, antiWindup: true };
+  const code = generateArduinoPID(settings);
+  const needs = ['Kp = 2.5f', 'Ki = 1.25f', 'Kd = 0.05f', 'SAMPLE_MS = 20UL', 'U_MAX = 6.0f', 'ANTI_WINDUP = true', 'Ki * Ts * (sumError + e)', '(e - previousError) / Ts'];
+  const missing = needs.filter((part) => !code.includes(part));
+  let rejects = false;
+  try {
+    generateArduinoPID({ ...settings, TsMs: 12.5 });
+  } catch {
+    rejects = true;
+  }
+  const cases = [
+    ['Ts = 1 ms equals the continuous PID', 'The two output curves coincide.', 'Largest gap ' + gap.toExponential(1), gap < 1e-9],
+    ['Zero-order hold', 'u changes only at sample instants (Ts = 100 ms).', changesInside + ' changes between samples', changesInside === 0],
+    ['Larger Ts, worse response', 'Peak never shrinks as Ts goes 10 → 200 → 350 ms, ends far higher, and 350 ms does not settle.', peaks.map((p) => p.toFixed(1) + '%').join(' → ') + (slowSettled ? ' · settles' : ' · not settled'), peaks[0] <= peaks[1] && peaks[1] < peaks[2] && peaks[2] > peaks[0] + 10 && !slowSettled],
+    ['Anti-windup works', 'Smaller peak and faster settling with it on (windup demo).', 'Peak ' + off.peakAboveTarget.toFixed(1) + '% → ' + on.peakAboveTarget.toFixed(1) + '% · settling ' + (off.metrics.settle ?? NaN).toFixed(2) + ' → ' + (on.metrics.settle ?? NaN).toFixed(2) + ' s', on.peakAboveTarget < off.peakAboveTarget && on.metrics.settle < off.metrics.settle],
+    ['Generated sketch', 'Gains, period, limit, anti-windup and the u[k] formula appear; a fractional period is refused.', missing.length ? 'Missing: ' + missing.join(', ') : 'All ' + needs.length + ' parts found' + (rejects ? ' · 12.5 ms refused' : ''), !missing.length && rejects],
+  ];
+  el('p3Checks').innerHTML = cases.map((args) => checkRow(...args)).join('');
+  const passed = cases.filter((c) => c[3]).length;
+  el('checkCount').className = 'readout ' + (passed === cases.length ? 'good' : 'bad');
+  el('checkCount').textContent = passed + ' of ' + cases.length + ' P3 checks pass.';
+};
+
 el('copyCode').addEventListener('click', async () => {
   const field = el('arduinoCode');
   const code = field.value;
@@ -207,3 +251,13 @@ el('copyCode').addEventListener('click', async () => {
 });
 
 bindModel(p3Fields, drawP3);
+
+// A module's nav item opens its page once the page is published; until then it
+// opens the module cards on the Control hub (the same approach as P2 and P4).
+for (const link of document.querySelectorAll('[data-module-page]')) {
+  fetch(link.dataset.modulePage, { method: 'HEAD' })
+    .then((r) => {
+      if (r.ok) link.href = link.dataset.modulePage;
+    })
+    .catch(() => {});
+}

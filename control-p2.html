@@ -17,20 +17,16 @@
   <script defer src="second-order.js"></script>
   <script defer src="control-p2.js"></script>
 </head>
-<body>
+<body class="p2">
 <header class="top"><div class="bar">
   <nav aria-label="Toolkit navigation"><a href="index.html"><i data-icon="home"></i>Hub</a><a href="control.html"><i data-icon="loop"></i>Control</a><a href="control.html#modules" data-module-page="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a><a href="control-p2.html" aria-current="page" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a><a href="control.html#modules" data-module-page="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a><a href="control.html#modules" data-module-page="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a><a href="control.html#modules" data-module-page="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a></nav>
   <button id="theme">Theme</button>
 </div></header>
 <main>
-  <header class="intro">
-    <div><p class="eyebrow">ENCS4380 &nbsp;/&nbsp; Control &nbsp;/&nbsp; P2</p>
-      <h1>A slow sensor in the loop</h1>
-      <p>Compare the speed of the wheel with the speed its controller sees.</p></div>
-    <div class="sensor-function"><span>Feedback sensor</span><div id="liveSensor"></div></div>
-  </header>
+  <section class="hero"><div><img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302"><p class="eyebrow">ENCS4380 · PID CONTROL · P2</p><h1>A slow sensor in the loop</h1><p class="credit">Amro Qutna · Dr. Wasel Ghanem</p><p class="lead">The controller never sees the wheel. It sees the sensor. Make the sensor slower and watch the controller keep pushing after the wheel has already arrived.</p></div>
+    <div class="sensor-function"><span>Feedback sensor</span><div id="liveSensor"></div><small>Drag τ<sub>s</sub> below and this updates.</small></div></section>
   <nav class="section-links" aria-label="On this page">
-    <a href="#experiment">Wheel response</a><a href="#predictTitle">Predictions</a><a href="#verify-title">Verify P2</a><a href="#model">Equations</a><a href="#bonus">Pole placement</a>
+    <a href="#experiment">Wheel response</a><a href="#sweepTitle">Overshoot against lag</a><a href="#predictTitle">Predictions</a><a href="#verify-title">Verify P2</a><a href="#model">Equations</a><a href="#bonus">Pole placement</a>
   </nav>
   <section class="bench" aria-labelledby="experiment">
     <aside class="settings" aria-labelledby="tuneTitle">
@@ -71,6 +67,13 @@
       </div>
       <p id="observation" aria-live="polite"></p>
     </div>
+  </section>
+  <section class="card sweep" aria-labelledby="sweepTitle">
+    <div class="card-header-flex"><h2 id="sweepTitle"><i data-icon="chart"></i>Overshoot against sensor lag</h2><span class="equation-pill" id="boundaryPill"></span></div>
+    <p>Every point is one full simulation with the gains you set above, at a different sensor lag. Past the dashed line the swings grow instead of dying out: that is where the loop starts to oscillate.</p>
+    <div id="sweepPlot" role="img" aria-label="Peak overshoot of the true speed against the sensor time constant, with the stability boundary marked"></div>
+    <div class="key"><span class="true">Peak overshoot of y</span><span class="target">Stability boundary (Routh)</span><span class="now">Your current τ<sub>s</sub></span></div>
+    <p id="sweepNote" class="readout" aria-live="polite"></p>
   </section>
   <section class="card">
     <h2 id="predictTitle">Predict, then check</h2>
@@ -126,6 +129,6 @@
     </details>
   </section>
 </main>
-<footer>Birzeit University · ENCS4380 Interfacing Techniques · Amro Qutna</footer>
+<footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>P2 · Amro Qutna</footer>
 </body>
 </html>

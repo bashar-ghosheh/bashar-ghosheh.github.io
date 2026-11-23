@@ -49,7 +49,62 @@ function drawExperiment() {
     xaxis: { ...axes, title: 'Time (s)', range: [0, 12], fixedrange: true },
     yaxis: { ...axes, title: 'Normalized speed', rangemode: 'tozero', fixedrange: true }
   }, { responsive: true, displayModeBar: false });
+  // The sweep is 41 runs: redraw it at once if the gains have not changed (only the
+  // marker moves), otherwise wait until the slider rests so dragging stays smooth.
+  clearTimeout(sweepTimer);
+  if (sweepCache.key === [opts.Kp, opts.Ki, opts.Kd].join('|')) drawSweep(opts);
+  else sweepTimer = setTimeout(() => drawSweep(opts), 150);
   return run;
+}
+
+// [HW2 P2] "As τs grows, overshoot grows until the loop oscillates."
+// Sweep τs from 0 to 2 s with the current gains and plot the peak overshoot.
+// The boundary comes from the same Routh test as stability():
+//   (1 + τs + Kd)(1 + Kp) = τs·Ki  →  τs* = (1 + Kd)(1 + Kp) / (Ki − 1 − Kp)
+// It exists only when Ki > 1 + Kp; otherwise no sensor lag makes this loop unstable.
+const SWEEP_LAGS = Array.from({ length: 41 }, (_, i) => i * 0.05);
+const SWEEP_CAP = 200; // %, growing swings are drawn at this ceiling
+let sweepCache = { key: '', peaks: [] };
+let sweepTimer = null;
+function lagBoundary({ Kp, Ki, Kd }) {
+  return Ki > 1 + Kp ? ((1 + Kd) * (1 + Kp)) / (Ki - 1 - Kp) : Infinity;
+}
+function drawSweep(opts) {
+  const key = [opts.Kp, opts.Ki, opts.Kd].join('|');
+  if (sweepCache.key !== key) {
+    // 5 ms steps keep 41 runs fast; the peak changes by well under 0.1%.
+    const peaks = SWEEP_LAGS.map((tauS) => {
+      const run = simulate({ plant: p2Plant, ...opts, tauS, T: 12, dtMax: 0.005 });
+      return Math.min(SWEEP_CAP, 100 * Math.max(0, Math.max(...run.y) - 1));
+    });
+    sweepCache = { key, peaks };
+  }
+  const { peaks } = sweepCache;
+  const star = lagBoundary(opts);
+  const current = peaks[Math.round(opts.tauS / 0.05)] ?? peaks[peaks.length - 1];
+  const top = Math.max(20, Math.min(SWEEP_CAP, Math.max(...peaks) * 1.1));
+  const shapes = Number.isFinite(star) && star <= 2
+    ? [
+        { type: 'rect', xref: 'x', yref: 'paper', x0: star, x1: 2, y0: 0, y1: 1, fillcolor: css('fail'), opacity: 0.08, line: { width: 0 } },
+        { type: 'line', xref: 'x', yref: 'paper', x0: star, x1: star, y0: 0, y1: 1, line: { color: css('target'), width: 2, dash: 'dash' } },
+      ]
+    : [];
+  const axes = { gridcolor: css('edge'), zerolinecolor: css('muted'), automargin: true, fixedrange: true };
+  Plotly.react('sweepPlot', [
+    { ...trace(SWEEP_LAGS, peaks, 'Peak overshoot'), mode: 'lines+markers', marker: { size: 5, color: css('output') } },
+    { x: [opts.tauS], y: [current], mode: 'markers', name: 'Now', marker: { size: 14, color: css('input'), line: { color: css('surface'), width: 2 } } },
+  ], {
+    showlegend: false, hovermode: 'x unified', paper_bgcolor: css('surface'), plot_bgcolor: css('surface'),
+    font: { color: css('text') }, margin: { l: 56, r: 12, t: 10, b: 44 }, shapes,
+    xaxis: { ...axes, title: 'Sensor lag τs (s)', range: [0, 2] },
+    yaxis: { ...axes, title: 'Peak overshoot of y (%)', range: [0, top] },
+  }, { responsive: true, displayModeBar: false });
+  el('boundaryPill').textContent = Number.isFinite(star) ? 'Oscillates from τs ≈ ' + star.toFixed(2) + ' s' : 'Stable for every τs';
+  const tail = Number.isFinite(star)
+    ? (star <= 2 ? 'With these gains the loop starts to oscillate at τs = ' + star.toFixed(2) + ' s.' : 'The boundary is at τs = ' + star.toFixed(2) + ' s, off this chart.')
+    : 'Ki ≤ 1 + Kp here, so no sensor lag can make this loop unstable; the lag still adds overshoot.';
+  verdict('sweepNote', Number.isFinite(star) && opts.tauS >= star ? 'bad' : 'good',
+    'At your τs = ' + opts.tauS.toFixed(2) + ' s the true speed overshoots by ' + (current >= SWEEP_CAP ? 'more than ' + SWEEP_CAP : current.toFixed(1)) + '%. ' + tail);
 }
 
 function clearFeedback() {

@@ -230,21 +230,6 @@ el('predictForm').onsubmit = (e) => {
   markStep(null);
 };
 
-// ---------------------------------------------------------------- module status
-// Each card asks the server whether its page exists yet, and says "Live" or "Being built".
-document.querySelectorAll('.control-grid .card[data-page]').forEach(async (card) => {
-  const chip = card.querySelector('.live-chip');
-  let live = false;
-  try {
-    live = (await fetch(card.dataset.page, { method: 'HEAD', cache: 'no-store' })).ok;
-  } catch {
-    live = false;
-  }
-  chip.textContent = live ? 'Live ✓' : 'Being built';
-  chip.classList.add(live ? 'live' : 'soon');
-  card.classList.toggle('soon', !live);
-});
-
 // ---------------------------------------------------------------- validation
 // [HW2 §2.1] The three checks, computed by pid-core.js.
 const checks = validationChecks();
@@ -253,21 +238,15 @@ const passed = checks.filter((c) => c.pass).length;
 el('checkSummary').className = 'readout ' + (passed === checks.length ? 'good' : 'bad');
 el('checkSummary').textContent = passed + ' of ' + checks.length + ' checks pass.';
 
-// ---------------------------------------------------------------- timeline
-(function timeline() {
-  const list = el('timeline'),
-    items = [...list.children],
-    today = new Date();
-  let next = items.findIndex((li) => new Date(li.dataset.date + 'T23:59:59') >= today);
-  if (next < 0) next = items.length;
-  items.forEach((li, i) => {
-    li.classList.toggle('past', i < next);
-    li.classList.toggle('next', i === next);
-  });
-  const fill = document.createElement('div');
-  fill.className = 'bar-fill';
-  list.prepend(fill);
-  // The line runs from the first dot to the last (75% of the width).
-  requestAnimationFrame(() => (fill.style.width = (75 * Math.min(1, Math.max(0, next - 0.5) / (items.length - 1))) + '%'));
-})();
 el('guessFinal').placeholder = 'e.g. 0.5';
+
+// ---------------------------------------------------------------- navigation
+// A module's nav item opens its page once the page is published; until then it
+// points at the module cards on this page.
+for (const link of document.querySelectorAll('[data-module-page]')) {
+  fetch(link.dataset.modulePage, { method: 'HEAD' })
+    .then((r) => {
+      if (r.ok) link.href = link.dataset.modulePage;
+    })
+    .catch(() => {});
+}

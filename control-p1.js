@@ -4,6 +4,13 @@ graphExamples.plantOutput = 'For the opening P-only run, inspect 0.10 s. The out
 graphExamples.actuator = 'In the limited PI experiment, inspect the command at 1 s. The actuator is delivering its maximum of 0.6.';
 el('predictedFinal').placeholder = 'e.g. 0.9';
 
+// Kept runs: up to three earlier runs drawn under the live one, so the effect of
+// changing one gain can be seen side by side (the lecture's P, I, D table).
+const KEEP_MAX = 3;
+const KEEP_DASH = ['dot', 'dashdot', 'longdash'];
+let kept = [];
+let lastRun = null;
+
 function drawPlayground() {
   const first = el('plantType').value === 'first';
   el('tauWrap').hidden = !first;
@@ -30,7 +37,8 @@ function drawPlayground() {
   el('rise').textContent = measurable && m.rise !== null ? m.rise.toFixed(3) + ' s' : '—';
   el('overshoot').textContent = measurable ? m.overshoot.toFixed(1) + '%' : '—';
   el('settle').textContent = measurable && m.settle !== null ? m.settle.toFixed(3) + ' s' : '—';
-  el('ess').textContent = m.settled ? Number(m.ess.toFixed(3)).toString() : '—';
+  // Shown as a percentage of the step, like the other Control pages.
+  el('ess').textContent = m.settled ? (100 * m.ess / r).toFixed(1) + '%' : '—';
   let note = 'Rise, overshoot and settling use the final output. Error is setpoint minus final output.';
   if (!moving) note = 'The output stayed at zero throughout this run.';
   else if (!m.settled) note = 'The output did not settle during this run. Try a longer simulation or adjust the gains.';
@@ -45,7 +53,10 @@ function drawPlayground() {
   const tPlot = thin(run.t);
   const timeAxis = { title: 'Time (s)' };
   const level = (value, name, role) => trace([0, T], [value, value], name, role);
-  plot('plantOutput', [trace(tPlot, thin(run.y), 'Output y'), level(r, 'Setpoint r', 'input')], timeAxis, { title: 'Output (units)' });
+  const ghosts = kept.map((k, i) => ({ x: k.t, y: k.y, name: k.label, mode: 'lines', line: { color: css('muted'), width: 2, dash: KEEP_DASH[i] }, opacity: 0.8 }));
+  plot('plantOutput', [trace(tPlot, thin(run.y), 'Output y'), level(r, 'Setpoint r', 'input'), ...ghosts], timeAxis, { title: 'Output (units)' });
+  lastRun = { t: tPlot, y: thin(run.y), m, measurable, plant: el('model').textContent, gains: [num('Kp'), num('Ki'), num('Kd')], r };
+  drawCompare();
   plot('actuator', [
     trace(tPlot, thin(run.u), 'Applied u'),
     level(uMin, 'Lower limit', 'target'),
@@ -53,6 +64,35 @@ function drawPlayground() {
   ], timeAxis, { title: 'Control (units)' });
   return m;
 }
+
+function rowCells(run) {
+  const { m, measurable, r } = run;
+  return [
+    measurable && m.rise !== null ? m.rise.toFixed(3) + ' s' : '—',
+    measurable ? m.overshoot.toFixed(1) + '%' : '—',
+    measurable && m.settle !== null ? m.settle.toFixed(3) + ' s' : '—',
+    m.settled ? (100 * m.ess / r).toFixed(1) + '%' : '—',
+  ];
+}
+function drawCompare() {
+  el('compareWrap').hidden = !kept.length;
+  el('clearRuns').disabled = !kept.length;
+  if (!kept.length) return;
+  const row = (name, run, cls) =>
+    '<tr class="' + cls + '"><th scope="row">' + name + (run.plant !== lastRun.plant ? ' <small>(other plant)</small>' : '') + '</th>' +
+    [...run.gains.map((g) => g.toFixed(2)), ...rowCells(run)].map((v) => '<td>' + v + '</td>').join('') + '</tr>';
+  el('compareRows').innerHTML = kept.map((k) => row(k.label, k, 'kept')).join('') + row('Live run', lastRun, 'live');
+}
+el('keepRun').onclick = () => {
+  if (!lastRun) return;
+  kept.push({ ...lastRun, label: 'Kept ' + (kept.length + 1) });
+  if (kept.length > KEEP_MAX) kept = kept.slice(-KEEP_MAX).map((k, i) => ({ ...k, label: 'Kept ' + (i + 1) }));
+  drawPlayground();
+};
+el('clearRuns').onclick = () => {
+  kept = [];
+  drawPlayground();
+};
 
 // [HW2 §2.1] Load repeatable experiments. Score against the simulated final output.
 const experiments = {
@@ -86,3 +126,13 @@ function renderValidation() {
 el('validation').addEventListener('toggle', renderValidation);
 renderValidation();
 bindModel(controls, drawPlayground);
+
+// A module's nav item opens its page once it is published; until then it opens
+// the module cards on the Control hub (the same approach as P2, P3 and P4).
+for (const link of document.querySelectorAll('[data-module-page]')) {
+  fetch(link.dataset.modulePage, { method: 'HEAD' })
+    .then((r) => {
+      if (r.ok) link.href = link.dataset.modulePage;
+    })
+    .catch(() => {});
+}
