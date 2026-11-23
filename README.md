@@ -117,7 +117,7 @@ Opened from the banner on the hub, or directly at `control.html`. Every module k
 
 | Member | Module | Page | Status |
 | :--- | :--- | :--- | :--- |
-| **Bashar Ghosheh** | P1: PID playground | `control-p1.html` | In progress |
+| **Bashar Ghosheh** | P1: PID playground | [P1](control-p1.html) | Completed |
 | **Amro Qutna** | P2: A slow sensor in the loop, and My system | [P2](control-p2.html), `control-system.html` | P2 complete, My system in progress |
 | **Tareq Ahmad** | P3: Digital PID and the Arduino code generator | [P3](control-p3.html) | Completed |
 | **Ahmad AlSheikh** | P4: Tuning challenge, Control hub, shared simulator, integration | `control-p4.html`, `control.html`, `pid-core.js` | Hub and simulator done, P4 in progress |
@@ -130,6 +130,14 @@ Opened from the banner on the hub, or directly at `control.html`. Every module k
 - P, I and D in plain words, and the table of what each gain does.
 - Cards for the five pages. Each card checks whether its page is online yet.
 - The three validation checks, computed by the shared simulator.
+
+## P1 · PID playground
+
+Open [the P1 playground](control-p1.html) from the Control hub. Choose a first-order plant ($K, \tau$) or second-order plant ($K, \zeta, \omega_n$), adjust $K_p$, $K_i$, $K_d$, the setpoint step $r$, and the actuator limits $u_{\min}/u_{\max}$ (supporting 0–100% limits).
+
+- Plots live closed-loop output $y$ against setpoint $r$ alongside the clipped control signal $u$ and its saturation rate.
+- Reports live 10–90% rise time, overshoot, ±2% settling time and steady-state error.
+- Includes three **Predict, then check** experiments (P-only, PI, and saturated PI) and the three Homework 2 validation checks.
 
 ## P2 · A slow sensor in the loop
 
@@ -231,5 +239,6 @@ In accordance with the course guidelines (Section 8):
 - **Module 3:** Codex assisted with implementation, packaging, numerical verification and repository integration. Tareq Ahmad is responsible for reviewing and explaining the module's code and equations.
 - **Module 4, hub and integration:** Claude assisted with the implementation of Module 4 and the hub page, moving Module 1 to the shared theme, browser testing and this README. Ahmad AlSheikh is responsible for reviewing and explaining the module's code and equations.
 - **PID Control hub and `pid-core.js` (Homework 2):** Claude assisted with the shared simulator and its tests, the Control hub page and this README. Ahmad AlSheikh is responsible for reviewing and explaining this code and its equations.
+- **P1 (Homework 2):** AI tools assisted with implementation review, bug fixes and verification of the PID playground page. Bashar Ghosheh is responsible for reviewing and explaining the module's code and equations.
 - **P2 (Homework 2):** AI assistance covered implementation and verification of the sensor and pole-placement experiments.
 - **P3 (Homework 2):** Codex assisted with the interactive sampling and anti-windup experiments, the Arduino sketch generator, and numerical and browser verification. Tareq Ahmad is responsible for explaining the module's code and equations.

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PID playground · ENCS4380</title>
+  <script src="module-assets/theme.js"></script>
+  <link rel="stylesheet" href="module-assets/styles.css">
+  <link rel="stylesheet" href="module-assets/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="module-assets/icons.js"></script>
+  <script defer src="module-assets/graph-reader.js"></script>
+  <script defer src="module-assets/shared.js"></script>
+  <script defer src="pid-core.js"></script>
+  <script defer src="control-p1.js"></script>
+</head>
+<body class="control-hub">
+<header class="top"><div class="bar">
+  <nav aria-label="Toolkit navigation">
+    <a href="index.html"><i data-icon="home"></i>Hub</a>
+    <a href="control.html"><i data-icon="loop"></i>Control</a>
+    <a href="control-p1.html" aria-current="page" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a>
+    <a href="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
+    <a href="control-p3.html" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a>
+    <a href="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
+    <a href="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
+  </nav>
+  <button id="theme">Theme</button>
+</div></header>
+<main>
+  <section class="hero">
+    <div>
+      <img class="university-mark" src="module-assets/birzeit.png" alt="Birzeit University" width="3840" height="1302">
+      <p class="eyebrow">ENCS4380 · CONTROL · P1</p>
+      <h1>PID playground</h1>
+      <p class="credit">Bashar Ghosheh · Dr. Wasel Ghanem</p>
+      <p class="lead">How close can the output get to its target? Tune the controller and follow the effort it asks of the actuator.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true"><i data-icon="sliders"></i></div>
+  </section>
+
+  <section class="card">
+    <h2><i data-icon="loop"></i>The feedback loop</h2>
+    <svg class="loop" viewBox="0 0 520 115" role="img" aria-label="Setpoint r enters the positive side of the summing junction. The output y returns through ideal feedback to the negative side. Error e drives the PID controller. The actuator limits its command before the plant receives u.">
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path class="arrowhead" d="M0 0L10 5L0 10Z"/></marker></defs>
+      <g class="wire" marker-end="url(#arrow)">
+        <path d="M25 35H72"/><path d="M106 35H156"/><path d="M222 35H252"/>
+        <path d="M328 35H378"/><path d="M454 35H500"/><path d="M474 35V95H89V54"/>
+      </g>
+      <g class="wire"><circle cx="89" cy="35" r="16"/><rect x="158" y="15" width="64" height="40" rx="8"/><rect x="254" y="15" width="74" height="40" rx="8"/><rect x="380" y="15" width="74" height="40" rx="8"/></g>
+      <g class="blk-t"><text x="89" y="41">Σ</text><text x="190" y="41">PID</text><text x="291" y="41">Limit</text><text x="417" y="41">Plant</text></g>
+      <g class="sig"><text x="8" y="39">r</text><text x="59" y="27">+</text><text x="70" y="70">−</text><text x="130" y="28">e</text><text x="349" y="28">u</text><text x="503" y="39">y</text></g>
+      <text class="blk-s" x="280" y="86">Ideal sensor feedback</text>
+    </svg>
+    <p>The sensor measures the output directly. The controller acts on the error <em>e = r − y</em>. P responds to the current error, I accumulates it, and D responds to how fast it changes.</p>
+  </section>
+
+  <section class="card" id="playground">
+    <h2><i data-icon="sliders"></i>Tune the controller</h2>
+    <div class="controls">
+      <div><label for="plantType">Plant model</label><select id="plantType">
+        <option value="first">First order · Module 1</option>
+        <option value="second">Second order · Module 3</option>
+      </select><p class="small-note" id="model"></p></div>
+      <div><label for="setpoint">Setpoint step r</label><input id="setpoint" type="range" min="0.1" max="3" step="0.1" value="1"></div>
+      <div><label for="duration">Simulation time</label><select id="duration">
+        <option value="2">2 seconds</option><option value="15" selected>15 seconds</option><option value="40">40 seconds</option>
+      </select></div>
+    </div>
+    <div class="controls">
+      <div><label for="plantK">Plant gain K</label><input id="plantK" type="range" min="0.1" max="10" step="0.1" value="1"></div>
+      <div id="tauWrap"><label for="plantTau">Time constant τ (s)</label><input id="plantTau" type="range" min="0.05" max="5" step="0.05" value="1"></div>
+      <div id="zetaWrap" hidden><label for="plantZeta">Damping ratio ζ</label><input id="plantZeta" type="range" min="0.1" max="2" step="0.05" value="0.3"></div>
+      <div id="wnWrap" hidden><label for="plantWn">Natural frequency ω<sub>n</sub> (rad/s)</label><input id="plantWn" type="range" min="0.5" max="10" step="0.1" value="2"></div>
+    </div>
+    <div class="controls">
+      <div><label for="Kp">Proportional gain K<sub>p</sub></label><input id="Kp" type="range" min="0" max="12" step="0.1" value="9"></div>
+      <div><label for="Ki">Integral gain K<sub>i</sub></label><input id="Ki" type="range" min="0" max="10" step="0.1" value="0"></div>
+      <div><label for="Kd">Derivative gain K<sub>d</sub></label><input id="Kd" type="range" min="0" max="0.8" step="0.05" value="0"></div>
+    </div>
+    <div class="controls">
+      <div><label for="uMin">Lower actuator limit</label><input id="uMin" type="range" min="-100" max="0" step="0.1" value="-10"></div>
+      <div><label for="uMax">Upper actuator limit</label><input id="uMax" type="range" min="0.1" max="100" step="0.1" value="10"></div>
+    </div>
+    <div class="metrics scoreboard">
+      <span class="metric-item">Rise time (10–90%)<strong id="rise"></strong></span>
+      <span class="metric-item">Overshoot<strong id="overshoot"></strong></span>
+      <span class="metric-item">Settling time (±2%)<strong id="settle"></strong></span>
+      <span class="metric-item">Steady-state error<strong id="ess"></strong></span>
+    </div>
+    <p class="small-note" id="metricNote"></p>
+  </section>
+
+  <section class="card">
+    <h2><i data-icon="target"></i>Output and setpoint</h2>
+    <div id="plantOutput" class="plot" aria-label="Plant output and setpoint versus time"></div>
+  </section>
+  <section class="card">
+    <h2><i data-icon="sliders"></i>Applied control signal</h2>
+    <p id="limitNote"></p>
+    <div id="actuator" class="plot" aria-label="Applied control signal and actuator limits versus time"></div>
+  </section>
+
+  <section class="card">
+    <h2><i data-icon="flask"></i>Predict, then check</h2>
+    <p>Each experiment uses the first-order plant and a unit step. Predict the final output, then run the experiment to load its settings into the playground.</p>
+    <form id="experiment">
+      <label for="question">Experiment</label>
+      <select id="question">
+        <option value="p">P only · Kₚ = 9, actuator range −10 to 10</option>
+        <option value="pi">PI · Kₚ = Kᵢ = 1, actuator range −10 to 10</option>
+        <option value="limited">PI · Kₚ = Kᵢ = 1, actuator range 0 to 0.6</option>
+      </select>
+      <div class="predict-action-row">
+        <div class="input-wrap"><label for="predictedFinal">Your predicted final output</label><input type="number" id="predictedFinal" min="0" max="3" step="any" required></div>
+        <button type="submit">Run and check</button>
+      </div>
+    </form>
+    <p id="result" role="status"></p>
+  </section>
+  <details id="validation" open>
+    <summary><i data-icon="checklist"></i>Reference validation checks</summary>
+    <p>These independent unit-step runs check the shared simulator against the first-order solution.</p>
+    <div id="checks" class="validation"></div>
+  </details>
+</main>
+<footer>Birzeit University · ENCS4380 · Dr. Wasel Ghanem<br>Bashar Ghosheh · P1</footer>
+</body>
+</html>

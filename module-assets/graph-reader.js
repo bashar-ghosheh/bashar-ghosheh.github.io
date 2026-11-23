@@ -71,6 +71,11 @@ function graphLandmarks(id, curve) {
         ['First sample', 0],
         ['Last sample', y.length - 1],
       ];
+    case 'actuator':
+      return [
+        ['Highest control', extremum(y, 1)],
+        ['Lowest control', extremum(y, -1)],
+      ];
     default:
       return [
         ['Highest output', extremum(y, 1)],
