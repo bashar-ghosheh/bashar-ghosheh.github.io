@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Digital PID · ENCS4380 P3</title>
+  <script src="module-assets/theme.js"></script>
+  <link rel="stylesheet" href="module-assets/styles.css">
+  <link rel="stylesheet" href="module-assets/control.css">
+  <link rel="stylesheet" href="module-assets/control-p3.css">
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="module-assets/icons.js"></script>
+  <script defer src="module-assets/graph-reader.js"></script>
+  <script defer src="module-assets/shared.js"></script>
+  <script defer src="pid-core.js"></script>
+  <script defer src="arduino-pid.js"></script>
+  <script defer src="control-p3.js"></script>
+</head>
+<body class="p3">
+<header class="top">
+  <div class="bar">
+    <nav aria-label="Toolkit navigation">
+      <a href="index.html"><i data-icon="home"></i>Hub</a>
+      <a href="control.html"><i data-icon="loop"></i>Control</a>
+      <a href="control-p1.html" aria-label="P1: PID playground"><i data-icon="sliders"></i>P1</a>
+      <a href="control-p2.html" aria-label="P2: A slow sensor in the loop"><i data-icon="eyeLag"></i>P2</a>
+      <a href="control-p3.html" aria-current="page" aria-label="P3: Digital PID"><i data-icon="chip"></i>P3</a>
+      <a href="control-p4.html" aria-label="P4: Tuning challenge"><i data-icon="target"></i>P4</a>
+      <a href="control-system.html" aria-label="My system: the micromouse motor"><i data-icon="motor"></i>My system</a>
+    </nav>
+    <button id="theme" type="button">Theme</button>
+  </div>
+</header>
+<main>
+  <header class="hero p3-intro">
+    <p class="eyebrow">ENCS4380 / CONTROL / P3</p>
+    <h1>Digital PID</h1>
+    <p>Watch the controller sample the error, update the PWM command, and hold it until the next sample. Try a slower sample rate or a tight actuator limit to see how each changes the response.</p>
+    <nav aria-label="On this page">
+      <a href="#experiment">Experiment</a>
+      <a href="#comparison">Compare results</a>
+      <a href="#predict">Predict, then check</a>
+      <a href="#arduino">Arduino code</a>
+    </nav>
+  </header>
+
+  <section class="p3-bench" id="experiment" aria-label="Digital PID experiment">
+    <aside class="card p3-settings" aria-labelledby="settings">
+      <h2 id="settings">Controller settings</h2>
+      <div class="actions p3-presets">
+        <button type="button" data-preset="fast">Fast · 10 ms</button>
+        <button type="button" data-preset="slow">Slow · 350 ms</button>
+        <button type="button" data-preset="windup">Windup demo</button>
+      </div>
+      <label for="TsMs">Sampling period T<sub>s</sub> (ms)</label>
+      <input id="TsMs" type="range" min="10" max="1000" step="1" value="10">
+      <label for="Kp">Proportional K<sub>p</sub></label>
+      <input id="Kp" type="range" min="0" max="12" step="0.05" value="5">
+      <label for="Ki">Integral K<sub>i</sub></label>
+      <input id="Ki" type="range" min="0" max="15" step="0.05" value="5">
+      <label for="Kd">Derivative K<sub>d</sub></label>
+      <input id="Kd" type="range" min="0" max="2" step="0.01" value="0">
+      <label class="p3-toggle"><input id="antiWindup" type="checkbox" checked> Enable anti-windup</label>
+      <label class="p3-toggle"><input id="compareWindup" type="checkbox"> Overlay the other anti-windup setting</label>
+      <details class="p3-model">
+        <summary>Plant and actuator</summary>
+        <p>Start with the normalized reference plant G(s) = K/(τs + 1). Enter your project values here when available.</p>
+        <label for="plantGain">Plant gain K</label>
+        <input id="plantGain" type="number" min="0.01" max="10000" step="any" value="1" required>
+        <label for="plantTau">Time constant τ (s)</label>
+        <input id="plantTau" type="number" min="0.01" max="20" step="any" value="1" required>
+        <label for="setpoint">Step target r</label>
+        <input id="setpoint" type="number" min="0.01" max="10000" step="any" value="1" required>
+        <label for="commandMax">Maximum command u<sub>max</sub></label>
+        <input id="commandMax" type="number" min="0.01" max="10000" step="any" value="6" required>
+        <p class="small-note">The command limit maps to 100% PWM. Lower the limit to see saturation.</p>
+      </details>
+      <p id="settingsError" class="bad" role="status" hidden></p>
+    </aside>
+
+    <div class="p3-results">
+      <section class="card" aria-labelledby="responseTitle">
+        <h2 id="responseTitle">Plant response</h2>
+        <p id="runSummary" class="p3-run-summary"></p>
+        <div id="digitalResponse" class="plot" role="img" aria-label="Plant output and target over time, with comparison traces"></div>
+        <p class="small-note">The plots start with the first 6 s. Drag to zoom or double-click to see the full 20 s run.</p>
+      </section>
+      <section class="card" aria-labelledby="commandTitle">
+        <h2 id="commandTitle">Held control command</h2>
+        <div id="digitalCommand" class="plot small" role="img" aria-label="Zero-order-held controller command with a marker at each sample and a PWM limit line"></div>
+      </section>
+      <noscript><p class="card">Enable JavaScript to run the simulation and generate the sketch.</p></noscript>
+      <p id="plotError" class="bad" role="status" hidden>The plotting library could not load. The tables and Arduino generator are still available.</p>
+    </div>
+  </section>
+
+  <section id="comparison" class="card" aria-labelledby="compareTitle">
+    <h2 id="compareTitle">Compare results</h2>
+    <p>Each row uses the shared RK4 simulator over 20 s. Peak above target is measured against r. Rise and 2% settling use the estimated final value when the run settles. Late error is r minus the mean output over the last 5% of the run.</p>
+    <h3 id="sweepTitle">Change the sampling period</h3>
+    <p>The gains, plant, limits and anti-windup setting are held fixed.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-labelledby="sweepTitle">
+      <table>
+        <thead><tr><th scope="col">T<sub>s</sub></th><th scope="col">10–90% rise</th><th scope="col">Peak above target</th><th scope="col">2% settling</th><th scope="col">Late error</th></tr></thead>
+        <tbody id="samplingRows"></tbody>
+      </table>
+    </div>
+    <h3 id="windupTitle">Switch anti-windup on or off</h3>
+    <p>Both rows use the selected sampling period. Try <strong>Windup demo</strong> to compare recovery after saturation.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-labelledby="windupTitle">
+      <table>
+        <thead><tr><th scope="col">Anti-windup</th><th scope="col">Clipped samples</th><th scope="col">Peak above target</th><th scope="col">2% settling</th><th scope="col">Late error</th></tr></thead>
+        <tbody id="windupRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="predict" class="card" aria-labelledby="predictTitle">
+    <h2 id="predictTitle">Predict, then check</h2>
+    <div class="p3-questions">
+      <form id="sampleQuestion">
+        <label for="sampleAnswer">With the sampling preset, what happens to the peak above target when T<sub>s</sub> grows from 10 to 350 ms?</label>
+        <select id="sampleAnswer" required>
+          <option value="">Choose a prediction</option>
+          <option value="higher">The peak is higher</option>
+          <option value="same">The peak stays the same</option>
+          <option value="lower">The peak is lower</option>
+        </select>
+        <button type="submit">Check sampling</button>
+        <p id="sampleFeedback" role="status" hidden></p>
+      </form>
+      <form id="windupQuestion">
+        <label for="windupAnswer">In the windup demo, which setting gives the smaller peak above target?</label>
+        <select id="windupAnswer" required>
+          <option value="">Choose a prediction</option>
+          <option value="on">Anti-windup on</option>
+          <option value="off">Anti-windup off</option>
+          <option value="same">Both give the same peak</option>
+        </select>
+        <button type="submit">Check anti-windup</button>
+        <p id="windupFeedback" role="status" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="arduino" class="card" aria-labelledby="arduinoTitle">
+    <div class="card-header-flex">
+      <h2 id="arduinoTitle">Arduino sketch</h2>
+      <button id="copyCode" type="button">Copy code</button>
+    </div>
+    <p>The sketch uses the current gains, target, sampling period, command limit and anti-windup setting. For the micromouse, replace <code>readSensor()</code> with the encoder speed in the same units as the target and configure the motor-driver PWM pin.</p>
+    <textarea id="arduinoCode" aria-label="Generated Arduino sketch" readonly spellcheck="false" rows="19" wrap="off"></textarea>
+    <p id="copyStatus" class="small-note" role="status"></p>
+  </section>
+
+  <details>
+    <summary>How the discrete PID works</summary>
+    <p class="equation"><code>u[k] = Kp·e[k] + Ki·Ts·Σ(j=0…k)e[j] + Kd·(e[k] − e[k−1])/Ts</code></p>
+    <p>At t = kT<sub>s</sub> the controller reads the output and computes e[k] = r − y[k]. The first derivative term is zero. The actuator clamps the command to [0, u<sub>max</sub>] and holds it until the next sample. The plant still advances with 1 ms RK4 steps between samples.</p>
+    <p>Anti-windup skips adding an error when the raw command is beyond a limit and the error pushes it farther into that limit. An error that drives the command back toward range can still update the sum.</p>
+  </details>
+</main>
+<footer>Birzeit University · ENCS4380 Interfacing Techniques · Tareq Ahmad</footer>
+</body>
+</html>
