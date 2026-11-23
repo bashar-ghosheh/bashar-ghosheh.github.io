@@ -119,7 +119,7 @@ Opened from the banner on the hub, or directly at `control.html`. Every module k
 | :--- | :--- | :--- | :--- |
 | **Bashar Ghosheh** | P1: PID playground | `control-p1.html` | In progress |
 | **Amro Qutna** | P2: A slow sensor in the loop, and My system | [P2](control-p2.html), `control-system.html` | P2 complete, My system in progress |
-| **Tareq Ahmad** | P3: Digital PID and the Arduino code generator | `control-p3.html` | In progress |
+| **Tareq Ahmad** | P3: Digital PID and the Arduino code generator | [P3](control-p3.html) | Completed |
 | **Ahmad AlSheikh** | P4: Tuning challenge, Control hub, shared simulator, integration | `control-p4.html`, `control.html`, `pid-core.js` | Hub and simulator done, P4 in progress |
 
 ## Control hub (`control.html`)
@@ -138,6 +138,14 @@ Open [the P2 experiment](control-p2.html) from the Control hub. Adjust the senso
 - Choose the 0.25 s sensor preset with the reference gains. At the first target crossing, the sensor reads about 0.645. Increase the lag to 1.5 s to see successive peaks grow.
 - Select **Run P2 checks** to compare all four presets against their expected behavior.
 - Open **Pole placement** to apply state feedback to the Module 3 mass-spring-damper. The page compares the selected poles with the calculated eigenvalues and plots the return to rest.
+
+## P3 · Digital PID
+
+Open [the digital PID experiment](control-p3.html) from the Control hub. Compare the 10 ms and 350 ms presets to see how the zero-order hold affects the output and PWM command. The sampling table keeps the other settings fixed and reports the measured response for several periods.
+
+- **Windup demo** applies a tight actuator limit and compares the same controller with conditional integration on and off.
+- **Arduino sketch** generates an Arduino Uno sketch from the active settings. For the micromouse, supply the measured plant values and replace the example analog input with calibrated encoder speed.
+- To reuse the generator from My system, load `arduino-pid.js` and call `generateArduinoPID({ Kp, Ki, Kd, TsMs, r, uMax, antiWindup })`. The returned sketch maps commands in the range 0 to `uMax` to 8-bit PWM.
 
 ## Shared simulator (`pid-core.js`)
 
@@ -224,3 +232,4 @@ In accordance with the course guidelines (Section 8):
 - **Module 4, hub and integration:** Claude assisted with the implementation of Module 4 and the hub page, moving Module 1 to the shared theme, browser testing and this README. Ahmad AlSheikh is responsible for reviewing and explaining the module's code and equations.
 - **PID Control hub and `pid-core.js` (Homework 2):** Claude assisted with the shared simulator and its tests, the Control hub page and this README. Ahmad AlSheikh is responsible for reviewing and explaining this code and its equations.
 - **P2 (Homework 2):** AI assistance covered implementation and verification of the sensor and pole-placement experiments.
+- **P3 (Homework 2):** Codex assisted with the interactive sampling and anti-windup experiments, the Arduino sketch generator, and numerical and browser verification. Tareq Ahmad is responsible for explaining the module's code and equations.
